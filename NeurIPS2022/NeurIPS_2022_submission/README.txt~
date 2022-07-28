@@ -1,0 +1,10 @@
+#--------------------------------------#
+#            INSTALLATION              #
+#--------------------------------------#
+
+- Installing Conda environment using .yml file:
+conda env create -f neurips_2022.yml
+
+- Mosek licence: To run the code, you will need to get a free Mosek license from: and put it in /home/<user>/mosek/mosek.lic (follow directions at link). 
+
+The jupyter notebook 'Example notebook for NeurIPS 2022.ipynb' contains examples. 
