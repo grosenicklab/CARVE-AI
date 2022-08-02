@@ -34,7 +34,7 @@ if not sys.warnoptions:
 # conflicted = importr('conflicted')
 # VarSelLCM = importr('VarSelLCM')
 
-os.chdir('/home/amb2022/clusterCCA_revision1/clusterCCA')
+os.chdir('..')
 
 
 # from cluster.selfrepresentation import ElasticNetSubspaceClustering
