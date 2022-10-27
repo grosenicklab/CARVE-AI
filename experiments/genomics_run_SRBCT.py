@@ -6,9 +6,8 @@ import multiprocessing
 print(sys.argv)
 code_path = sys.argv[1] # e.g., '/home/amb2022/clusterCCA_revision1/clusterCCA/'
 sys.path.append(code_path)
-sys.path.append(code_path+'/experiments/icml-2022/')
+sys.path.append(code_path+'/experiments/')
 sys.path.append(code_path+'/utils/subspace-clustering-master')
-# os.chdir(code_path+'/utils/subspace-clustering-master')
 
 import mosek
 import cvxpy as cp
