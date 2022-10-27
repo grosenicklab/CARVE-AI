@@ -203,98 +203,98 @@ penalty_list = np.concatenate((np.repeat(np.inf,10),np.exp(np.linspace(-10,10,15
 gauss_coef=2.0
 # 14 cancer
 def f_14c_a():
-    run_14Cancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=3, neighbors=15, penalty_list = penalty_list)
+    run_14Cancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=3, neighbors=15, penalty_list = penalty_list)
 
 def f_14c_b():
-    run_14Cancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=15, neighbors=15, penalty_list = penalty_list)
+    run_14Cancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=15, neighbors=15, penalty_list = penalty_list)
 
 def f_14c_c(): 
-    run_14Cancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=20, neighbors=15, penalty_list = penalty_list)
+    run_14Cancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=20, neighbors=15, penalty_list = penalty_list)
 
 def f_14c_d():
-    run_14Cancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=3, neighbors=25, penalty_list = penalty_list)
+    run_14Cancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=3, neighbors=25, penalty_list = penalty_list)
 
 def f_14c_e(): 
-    run_14Cancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=15, neighbors=25, penalty_list = penalty_list)
+    run_14Cancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=15, neighbors=25, penalty_list = penalty_list)
 
 def f_14c_f():
-    run_14Cancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=20, neighbors=25, penalty_list = penalty_list)
+    run_14Cancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=20, neighbors=25, penalty_list = penalty_list)
 
 # NCI
 def f_NCI_a():
-    run_NCIgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=3, neighbors=15, penalty_list = penalty_list)
+    run_NCIgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=3, neighbors=15, penalty_list = penalty_list)
 
 def f_NCI_b():
-    run_NCIgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=14, neighbors=15, penalty_list = penalty_list)
+    run_NCIgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=14, neighbors=15, penalty_list = penalty_list)
 
 def f_NCI_c(): 
-    run_NCIgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=20, neighbors=15, penalty_list = penalty_list)
+    run_NCIgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=20, neighbors=15, penalty_list = penalty_list)
 
 def f_NCI_d():
-    run_NCIgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=3, neighbors=25, penalty_list = penalty_list)
+    run_NCIgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=3, neighbors=25, penalty_list = penalty_list)
 
 def f_NCI_e(): 
-    run_NCIgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=14, neighbors=25, penalty_list = penalty_list)
+    run_NCIgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=14, neighbors=25, penalty_list = penalty_list)
 
 def f_NCI_f():
-    run_NCIgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=20, neighbors=25, penalty_list = penalty_list)
+    run_NCIgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=20, neighbors=25, penalty_list = penalty_list)
 
 # SRBCT
 def f_SRBCT_a():
-    run_SRBCTgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=3, neighbors=15, penalty_list = penalty_list)
+    run_SRBCTgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=3, neighbors=15, penalty_list = penalty_list)
 
 def f_SRBCT_b():
-    run_SRBCTgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=5, neighbors=15, penalty_list = penalty_list)
+    run_SRBCTgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=5, neighbors=15, penalty_list = penalty_list)
 
 def f_SRBCT_c(): 
-    run_SRBCTgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=10, neighbors=15, penalty_list = penalty_list)
+    run_SRBCTgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=10, neighbors=15, penalty_list = penalty_list)
 
 def f_SRBCT_d():
-    run_SRBCTgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=3, neighbors=25, penalty_list = penalty_list)
+    run_SRBCTgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=3, neighbors=25, penalty_list = penalty_list)
 
 def f_SRBCT_e(): 
-    run_SRBCTgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=5, neighbors=25, penalty_list = penalty_list)
+    run_SRBCTgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=5, neighbors=25, penalty_list = penalty_list)
 
 def f_SRBCT_f():
-    run_SRBCTgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=10, neighbors=25, penalty_list = penalty_list)
+    run_SRBCTgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=10, neighbors=25, penalty_list = penalty_list)
 
 # GbmBreastLungCancer
 def f_GbmBreastLungCancer_a():
-    run_GbmBreastLungCancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=3, neighbors=15, penalty_list = penalty_list)
+    run_GbmBreastLungCancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=3, neighbors=15, penalty_list = penalty_list)
 
 def f_GbmBreastLungCancer_b():
-    run_GbmBreastLungCancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=4, neighbors=15, penalty_list = penalty_list)
+    run_GbmBreastLungCancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=4, neighbors=15, penalty_list = penalty_list)
 
 def f_GbmBreastLungCancer_c(): 
-    run_GbmBreastLungCancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=10, neighbors=15, penalty_list = penalty_list)
+    run_GbmBreastLungCancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=10, neighbors=15, penalty_list = penalty_list)
 
 def f_GbmBreastLungCancer_d():
-    run_GbmBreastLungCancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=3, neighbors=25, penalty_list = penalty_list)
+    run_GbmBreastLungCancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=3, neighbors=25, penalty_list = penalty_list)
 
 def f_GbmBreastLungCancer_e(): 
-    run_GbmBreastLungCancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=4, neighbors=25, penalty_list = penalty_list)
+    run_GbmBreastLungCancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=4, neighbors=25, penalty_list = penalty_list)
 
 def f_GbmBreastLungCancer_f():
-    run_GbmBreastLungCancergenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=10, neighbors=25, penalty_list = penalty_list)
+    run_GbmBreastLungCancergenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=10, neighbors=25, penalty_list = penalty_list)
 
 # MouseOrgans
 def f_MouseOrgans_a():
-    run_MouseOrgansgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=3, neighbors=15, penalty_list = penalty_list)
+    run_MouseOrgansgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=3, neighbors=15, penalty_list = penalty_list)
 
 def f_MouseOrgans_b():
-    run_MouseOrgansgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=8, neighbors=15, penalty_list = penalty_list)
+    run_MouseOrgansgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=8, neighbors=15, penalty_list = penalty_list)
 
 def f_MouseOrgans_c(): 
-    run_MouseOrgansgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=20, neighbors=15, penalty_list = penalty_list)
+    run_MouseOrgansgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=20, neighbors=15, penalty_list = penalty_list)
 
 def f_MouseOrgans_d():
-    run_MouseOrgansgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=3, neighbors=25, penalty_list = penalty_list)
+    run_MouseOrgansgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=3, neighbors=25, penalty_list = penalty_list)
 
 def f_MouseOrgans_e(): 
-    run_MouseOrgansgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=8, neighbors=25, penalty_list = penalty_list)
+    run_MouseOrgansgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=8, neighbors=25, penalty_list = penalty_list)
 
 def f_MouseOrgans_f():
-    run_MouseOrgansgenomics_Full_problem_rank(gauss_coef=gauss_coef, problem_rank=20, neighbors=25, penalty_list = penalty_list)
+    run_MouseOrgansgenomics_Full_problem_rank(dir_path=saving_dir_fullpath, gauss_coef=gauss_coef, problem_rank=20, neighbors=25, penalty_list = penalty_list)
 
 
 
