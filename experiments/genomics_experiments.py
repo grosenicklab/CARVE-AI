@@ -6,7 +6,7 @@ import sys
 import multiprocessing  
 # os.chdir('/home/amb2022/clusterCCA_revision1/clusterCCA/utils/subspace-clustering-master')
 # import cluster
-os.chdir('/home/amb2022/clusterCCA_revision1/clusterCCA')
+os.chdir('/home/amb2022/clusterCCA_revision1/PCMF')
 
 import mosek
 import cvxpy as cp
