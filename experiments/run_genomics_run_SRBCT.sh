@@ -16,5 +16,5 @@ echo 'Code path is : '${code_path}
 cd $code_path
 pwd
 
-echo python ${code_path}experiments/initialize_genomics_SRBCT.py.py $code_path
-python ${code_path}experiments/initialize_genomics_SRBCT.py.py $code_path
+echo python ${code_path}experiments/initialize_genomics_SRBCT.py $code_path
+python ${code_path}experiments/initialize_genomics_SRBCT.py $code_path
