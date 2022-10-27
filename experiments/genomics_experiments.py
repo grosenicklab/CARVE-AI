@@ -6,7 +6,7 @@ import sys
 import multiprocessing  
 # os.chdir('/home/amb2022/clusterCCA_revision1/clusterCCA/utils/subspace-clustering-master')
 # import cluster
-os.chdir('/athena/listonlab/store/amb2022/clusterCCA_revision1/PCMF')
+os.chdir('/athena/listonlab/store/amb2022/PCMF/')
 
 saving_dir_fullpath='/athena/listonlab/scratch/amb2022/PCMF/results/'
 
