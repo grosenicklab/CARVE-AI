@@ -52,12 +52,11 @@ def run_14Cancergenomics_Full_problem_rank(dir_path='results/',data_path='data/'
     # Run PCMF
     tic = time.time()
     pcmf_type = 'AISTATS_pcmf_full'
-    save_path = dir_path+pcmf_type+'_14Cancer_genomics_run_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)
-    # output_file = dir_path+pcmf_type+'_14Cancer_genomics_run_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)+'.txt'
+    save_path = dir_path+pcmf_type+'_14Cancer_genomics_run'+'_rank'+str(problem_rank)+'_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)
     print(save_path)
     A, U, S, V = pcmf_full(X_c, penalty_list, rho=rho, problem_rank=problem_rank, numba=True, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, print_progress=True, parallel=parallel, output_file=save_path+'.txt')
     toc = time.time() - tic
-    np.savez(save_path+'.npz', pcmf_type=pcmf_type, X_c=X_c, true_clusters=true_clusters, labels_names=labels_names, A=A, V=V, U=U, S=S, runtime=toc, penalty_list=penalty_list, rho=rho, numba=True, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, scale_data=True, intercept=True) 
+    np.savez(save_path+'.npz', problem_rank=problem_rank, pcmf_type=pcmf_type, X_c=X_c, true_clusters=true_clusters, labels_names=labels_names, A=A, V=V, U=U, S=S, runtime=toc, penalty_list=penalty_list, rho=rho, numba=True, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, scale_data=True, intercept=True) 
 
 def run_NCIgenomics_Full_problem_rank(dir_path='results/',data_path='data/', problem_rank=3, admm_iters = 5, gauss_coef=2.0, neighbors=None, rho = 1, weights='Gaussian', penalty_list = np.concatenate((np.repeat(np.inf,10),np.exp(np.linspace(-5,500,150))[::-1]),axis=0), parallel=True, output_file='NaN'):
     # Load NCI dataset
@@ -75,12 +74,11 @@ def run_NCIgenomics_Full_problem_rank(dir_path='results/',data_path='data/', pro
     # Run PCMF
     tic = time.time()
     pcmf_type = 'AISTATS_pcmf_full'
-    save_path = dir_path+pcmf_type+'_NCI_genomics_run_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)
-    # output_file = dir_path+pcmf_type+'_NCI_genomics_run_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)+'.txt'
+    save_path = dir_path+pcmf_type+'_NCI_genomics_run_run'+'_rank'+str(problem_rank)+'_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)
     print(save_path)
     A, U, S, V = pcmf_full(X_c, penalty_list, rho=rho, numba=True, problem_rank=problem_rank, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, print_progress=True, parallel=parallel, output_file=save_path+'.txt')
     toc = time.time() - tic
-    np.savez(save_path+'.npz', pcmf_type=pcmf_type, X_c=X_c, true_clusters=true_clusters, A=A, V=V, U=U, S=S, runtime=toc, penalty_list=penalty_list, rho=rho, numba=True, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, scale_data=True, intercept=True) 
+    np.savez(save_path+'.npz', problem_rank=problem_rank, pcmf_type=pcmf_type, X_c=X_c, true_clusters=true_clusters, A=A, V=V, U=U, S=S, runtime=toc, penalty_list=penalty_list, rho=rho, numba=True, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, scale_data=True, intercept=True) 
 
 def run_SRBCTgenomics_Full_problem_rank(dir_path='results/',data_path='data/', problem_rank=3, admm_iters = 5, gauss_coef=2.0, neighbors=None, rho = 1, weights='Gaussian', penalty_list = np.concatenate((np.repeat(np.inf,10),np.exp(np.linspace(-5,500,150))[::-1]),axis=0), parallel=True, output_file='NaN'):
     # Load SRBCT dataset
@@ -102,12 +100,11 @@ def run_SRBCTgenomics_Full_problem_rank(dir_path='results/',data_path='data/', p
     # Run PCMF
     tic = time.time()
     pcmf_type = 'AISTATS_pcmf_full'
-    save_path = dir_path+pcmf_type+'_SRBCT_genomics_run_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)
-    # output_file = dir_path+pcmf_type+'_SRBCT_genomics_run_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)+'.txt'
+    save_path = dir_path+pcmf_type+'_SRBCT_genomics_run_run'+'_rank'+str(problem_rank)+'_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)
     print(save_path)
     A, U, S, V = pcmf_full(X_c, penalty_list, rho=rho, numba=True, problem_rank=problem_rank, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, print_progress=True, parallel=parallel, output_file=save_path+'.txt')
     toc = time.time() - tic
-    np.savez(save_path+'.npz', pcmf_type=pcmf_type, X_c=X_c, true_clusters=true_clusters, A=A, V=V, U=U, S=S, runtime=toc, penalty_list=penalty_list, rho=rho, numba=True, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, scale_data=True, intercept=True) 
+    np.savez(save_path+'.npz', problem_rank=problem_rank, pcmf_type=pcmf_type, X_c=X_c, true_clusters=true_clusters, A=A, V=V, U=U, S=S, runtime=toc, penalty_list=penalty_list, rho=rho, numba=True, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, scale_data=True, intercept=True) 
 
 def load_mouse_organs(data_path,quantile_prob=0.2):
     'quantile_prob is Percentile for data filtering.'
@@ -160,12 +157,11 @@ def run_MouseOrgansgenomics_Full_problem_rank(dir_path='results/',data_path='dat
     # Run PCMF
     tic = time.time()
     pcmf_type = 'AISTATS_pcmf_full'
-    save_path = dir_path+pcmf_type+'_MouseOrgans_genomics_run_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)
-    # output_file = dir_path+pcmf_type+'_MouseOrgans_genomics_run_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)+'.txt'
+    save_path = dir_path+pcmf_type+'_MouseOrgans_genomics_run_run'+'_rank'+str(problem_rank)+'_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)
     print(save_path)
     A, U, S, V = pcmf_full(X_c, penalty_list, rho=rho, numba=True, problem_rank=problem_rank, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, print_progress=True, parallel=parallel, output_file=save_path+'.txt')
     toc = time.time() - tic
-    np.savez(save_path+'.npz', pcmf_type=pcmf_type, X_c=X_c, true_clusters=true_clusters, A=A, V=V, U=U, S=S, runtime=toc, penalty_list=penalty_list, rho=rho, numba=True, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, scale_data=True, intercept=True) 
+    np.savez(save_path+'.npz', problem_rank=problem_rank, pcmf_type=pcmf_type, X_c=X_c, true_clusters=true_clusters, A=A, V=V, U=U, S=S, runtime=toc, penalty_list=penalty_list, rho=rho, numba=True, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, scale_data=True, intercept=True) 
 
 def run_GbmBreastLungCancergenomics_Full_problem_rank(dir_path='results/',data_path='data/', problem_rank=3, admm_iters = 5, gauss_coef=2.0, neighbors=None, rho = 1, weights='Gaussian', penalty_list = np.concatenate((np.repeat(np.inf,10),np.exp(np.linspace(-5,500,150))[::-1]),axis=0), parallel=True, output_file='NaN'):
     # Load GbmBreastLungCancer dataset
@@ -190,12 +186,11 @@ def run_GbmBreastLungCancergenomics_Full_problem_rank(dir_path='results/',data_p
     # Run PCMF
     tic = time.time()
     pcmf_type = 'AISTATS_pcmf_full'
-    save_path = dir_path+pcmf_type+'_GbmBreastLungCancer_genomics_run_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)
-    # output_file = dir_path+pcmf_type+'_GbmBreastLungCancer_genomics_run_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)+'.txt'
+    save_path = dir_path+pcmf_type+'_GbmBreastLungCancer_genomics_run_run'+'_rank'+str(problem_rank)+'_gausscoef'+str(gauss_coef)+'_neighbors'+str(neighbors)+'_rho'+str(rho)
     print(save_path)
     A, U, S, V = pcmf_full(X_c, penalty_list, rho=rho, numba=True, problem_rank=problem_rank, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, print_progress=True, parallel=parallel, output_file=save_path+'.txt')
     toc = time.time() - tic
-    np.savez(save_path+'.npz', pcmf_type=pcmf_type, X_c=X_c, true_clusters=true_clusters, A=A, V=V, U=U, S=S, runtime=toc, penalty_list=penalty_list, rho=rho, numba=True, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, scale_data=True, intercept=True) 
+    np.savez(save_path+'.npz', problem_rank, pcmf_type=pcmf_type, X_c=X_c, true_clusters=true_clusters, A=A, V=V, U=U, S=S, runtime=toc, penalty_list=penalty_list, rho=rho, numba=True, admm_iters = admm_iters, weights=weights, gauss_coef=gauss_coef, neighbors=neighbors, scale_data=True, intercept=True) 
 
 def smap(f):
     return f()
