@@ -8,6 +8,8 @@ import multiprocessing
 # import cluster
 os.chdir('/home/amb2022/clusterCCA_revision1/PCMF')
 
+saving_dir_fullpath='/athena/listonlab/scratch/amb2022/PCMF/results/'
+
 import mosek
 import cvxpy as cp
 import time
