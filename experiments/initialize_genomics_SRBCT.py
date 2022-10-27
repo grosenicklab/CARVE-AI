@@ -34,7 +34,7 @@ from scipy.stats import multivariate_normal
 from collections import OrderedDict
 np.random.seed(1234)
 
-from aistats_genomics_experiments import *
+from genomics_experiments import *
 # Parallel function
 
 # Pool
