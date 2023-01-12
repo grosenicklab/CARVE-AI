@@ -17,7 +17,6 @@ from admm_utils import prox as cprox
 
 from numba import jit, prange
 
-
 def tac():
     t_sec = round(time.time() - _start_time)
     (t_min, t_sec) = divmod(t_sec,60)
