@@ -826,6 +826,55 @@ def pcmf_full_consensus_OLD(X_all, penalty_list, problem_rank=1, rho=1.0, admm_i
         
     return A_list, U_list, s_list, V_list
 
+########################## Predict and project on test data / new data #######################
+
+def PCMF_predict_clusters(X_test, X_train, V, p, true_clusters_train, PCMFtype='Full', true_clusters_test_predict=None):# Get cluster PCA component
+    '''Function to take held out test data and project it to PCA component and predict clusters
+       Inputs:  X_test: n_test x p (already centered using np.mean(X_train, axis=0))
+                X_train: n_train x p  (already centered using np.mean(X_train, axis=0))
+                V: #penalties x r x p; list output of PCMF_Full of rank r
+                p: penalty index on path
+                true_clusters_train: n_train x 1; true cluster labels for training set
+                true_clusters_test_predict: n_test x 1; Optional argument; if available, the true labels for test set to get accuracy
+    '''
+    from scipy.spatial.distance import cdist
+    
+    XV_c = []
+    if PCMFtype is 'Full':
+        for cluster in np.unique(true_clusters_train):
+            XV_c.append(np.mean((X_train[true_clusters_train==cluster,:] @ np.array(V)[p,:,:].T),0))
+        XV_test = (X_test @ np.array(V)[p,:,:].T)
+        
+        cluster_dist = cdist( XV_test, XV_c )
+        
+    elif PCMFtype is 'PALS':
+        for cluster in np.unique(true_clusters_train):
+            XV_c.append(np.mean((X_train[true_clusters_train==cluster,:] @ np.mean(np.array(V)[p,true_clusters_train==cluster,:], axis=0)[:, np.newaxis] ),0) )
+        XV_test = (X_test @ np.mean(np.array(V)[p,true_clusters_train==cluster,:], axis=0)[:, np.newaxis])
+        
+        cluster_dist = []
+        for cluster in np.unique(true_clusters_train):
+            cluster_dist.append( cdist( XV_tests[cluster], XV_c[cluster:cluster+1] )[:,0] ) 
+        cluster_dist = np.array(cluster_dist).T
+
+    else:
+        print("Wrong PCMFtype: ", PCMFtype)
+        return [], [], [], []
+            
+    XV_c = np.array(XV_c)
+
+    # Project new subjects and assign to clusters
+    true_clusters_test_predict = np.argmin(cluster_dist, 1)
+
+    if len(true_clusters_test_predict)>1:
+        # Check alignment to true clusters
+        cluster_acc = np.sum(true_clusters_test == true_clusters_test_predict) / len(true_clusters_test)
+        print('Test set cluster accuracy:', cluster_acc)
+    else:
+        cluster_acc = []
+
+    return XV_c, true_clusters_test_predict, XV_test, cluster_acc
+
 ########################## Clustering helper functions #######################
 
 def centroid_matrix(X,labels):
