@@ -828,14 +828,14 @@ def pcmf_full_consensus_OLD(X_all, penalty_list, problem_rank=1, rho=1.0, admm_i
 
 ########################## Predict and project on test data / new data #######################
 
-def PCMF_predict_clusters(X_test, X_train, V, p, true_clusters_train, PCMFtype='Full', true_clusters_test_predict=None):# Get cluster PCA component
+def PCMF_predict_clusters(X_test, X_train, V, p, true_clusters_train, PCMFtype='Full', true_clusters_test=None):# Get cluster PCA component
     '''Function to take held out test data and project it to PCA component and predict clusters
        Inputs:  X_test: n_test x p (already centered using np.mean(X_train, axis=0))
                 X_train: n_train x p  (already centered using np.mean(X_train, axis=0))
                 V: #penalties x r x p; list output of PCMF_Full of rank r
                 p: penalty index on path
                 true_clusters_train: n_train x 1; true cluster labels for training set
-                true_clusters_test_predict: n_test x 1; Optional argument; if available, the true labels for test set to get accuracy
+                true_clusters_test: n_test x 1; Optional argument; if available, the true labels for test set to get accuracy
     '''
     from scipy.spatial.distance import cdist
     
