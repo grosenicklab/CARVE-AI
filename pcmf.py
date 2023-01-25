@@ -866,7 +866,7 @@ def PCMF_predict_clusters(X_test, X_train, V, p, true_clusters_train, PCMFtype='
     # Project new subjects and assign to clusters
     true_clusters_test_predict = np.argmin(cluster_dist, 1)
 
-    if len(true_clusters_test_predict)>1:
+    if len(true_clusters_test)>1:
         # Check alignment to true clusters
         cluster_acc = np.sum(true_clusters_test == true_clusters_test_predict) / len(true_clusters_test)
         print('Test set cluster accuracy:', cluster_acc)
