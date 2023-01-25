@@ -825,6 +825,83 @@ def pcmf_full_consensus_OLD(X_all, penalty_list, problem_rank=1, rho=1.0, admm_i
         print("KeyboardInterrupt has been caught.")
         
     return A_list, U_list, s_list, V_list
+########################## New cluster fitting method using adjacency matrix #######################
+def diff_graph_cluster(Xhat, D, comb_list, num_clusters, thresh_sd=6, pca_clean=True, num_fits=1, verbose=False, use_adjacency=False):
+    '''
+    Given a PCMF data approximation 'Xhat' for a fixed lambda and a differencing matrix 'D', calculate the
+    difference variable graph as suggested in Chi and Lange JCGC (2015), clustering on the graph adjacency
+    matrix (or a PCA embedding of it if pca_clean=True).
+
+    Args:
+        Xhat - PCMF data approximation at a fixed penalty parameter.
+        D - a sparse differencing matrix given by 'sparse_D'.
+        comb_list - the combination indices returned by 'sparse_D'.
+        num_clusters - the number of clusters.
+        thresh_sd - a threshold standard deviation cuttoff for thresholding the difference graph.
+        pca_clean - boolean; should the PCA of the adjacency matrix be used for clustering.
+        num_fits - number of spectral clusterings to take the median of for output.
+        verbose - Print threshold adjustment; plot histogram graph edges and show GMM fit used to choose threshold.
+
+    '''
+    n,p = Xhat.shape
+
+    # Get graph edges from distances, and estimate graph threshold from edge mode centered around zero
+    edges = np.sum(np.abs(D*Xhat),axis=1)
+    gmm = GaussianMixture(n_components = 6, max_iter=200, n_init=10).fit(edges.reshape(-1, 1))
+    zero_mode_idx = np.where(np.abs(gmm.means_)==np.min(np.abs(gmm.means_)))[0]
+    thresh = thresh_sd*np.sqrt(gmm.covariances_[zero_mode_idx])
+
+    # Make adjacency from sum of differences (and adjust threshold if necessary)
+    flag = True
+    while flag==True:
+        # Generate graph
+        G = nx.Graph()
+        for i,e in enumerate(edges):
+            if np.abs(e) < thresh:
+                G.add_edge(comb_list[i][0], comb_list[i][1])
+        A = nx.adjacency_matrix(G).toarray()
+        if verbose:
+            print('threshold:',thresh)
+        if A.shape[0] < Xhat.shape[0]:
+            thresh *= 1.1
+        else:
+            flag = False
+
+    if not use_adjacency:
+        deg = np.diag(np.sum(A, axis=1))
+        K = nx.modularity_matrix(G)
+        A = n*np.sqrt(deg)@K@np.sqrt(deg) # From RMT4ML pg 265
+
+    # Apply spectral clustering, taking median of 'num_fits' tryes to get output labels
+    out_labels = []
+    for f in range(num_fits):
+        # Use PCA of A if 'pca_clean' flag set
+        if pca_clean:
+            uA, sA, vhA = np.linalg.svd(A)
+            spectral_clustering = SpectralClustering(n_clusters=num_clusters, random_state=20, affinity="nearest_neighbors", assign_labels="cluster_qr").fit(uA[:,0:num_clusters])
+            out_labels.append(spectral_clustering.labels_)
+        else:
+            spectral_clustering = SpectralClustering(n_clusters=num_clusters, random_state=20, affinity="nearest_neighbors", assign_labels="cluster_qr").fit(A)
+            out_labels.append(spectral_clustering.labels_)
+
+    # Plot thresholding histogram if 'plot_thresh_hist' is true
+    if verbose:
+        plt.figure(figsize=(10,5))
+        _ = plt.hist(edges,bins=100,density=True)
+
+        f_axis = edges.copy().ravel()
+        f_axis.sort()
+        a = []
+        for weight, mean, covar in zip(gmm.weights_, gmm.means_, gmm.covariances_):
+            a.append(weight*norm.pdf(f_axis, mean, np.sqrt(covar)).ravel())
+            plt.plot(f_axis, a[-1])
+        plt.plot(f_axis, np.array(a).sum(axis=0), 'k-')
+        plt.xlabel('Variable')
+        plt.ylabel('PDF')
+        plt.tight_layout()
+        plt.show()
+
+    return np.median(np.array(out_labels),axis=0)
 
 ########################## Predict and project on test data / new data #######################
 
