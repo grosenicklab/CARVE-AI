@@ -825,86 +825,314 @@ def pcmf_full_consensus_OLD(X_all, penalty_list, problem_rank=1, rho=1.0, admm_i
         print("KeyboardInterrupt has been caught.")
         
     return A_list, U_list, s_list, V_list
+
+######### UPDATED CONSENUS ########
+def svd_flip(u, v, u_based_decision=True):
+    """Sign correction to ensure deterministic output from SVD.
+    Adjusts the columns of u and the rows of v such that the loadings in the
+    columns in u that are largest in absolute value are always positive.
+    Parameters
+    ----------
+    u : ndarray
+        Parameters u and v are the output of `linalg.svd` or
+        :func:`~sklearn.utils.extmath.randomized_svd`, with matching inner
+        dimensions so one can compute `np.dot(u * s, v)`.
+    v : ndarray
+        Parameters u and v are the output of `linalg.svd` or
+        :func:`~sklearn.utils.extmath.randomized_svd`, with matching inner
+        dimensions so one can compute `np.dot(u * s, v)`.
+        The input v should really be called vt to be consistent with scipy's
+        output.
+    u_based_decision : bool, default=True
+        If True, use the columns of u as the basis for sign flipping.
+        Otherwise, use the rows of v. The choice of which variable to base the
+        decision on is generally algorithm dependent.
+    Returns
+    -------
+    u_adjusted : ndarray
+        Array u with adjusted columns and the same dimensions as u.
+    v_adjusted : ndarray
+        Array v with adjusted rows and the same dimensions as v.
+    """
+    if u_based_decision:
+#         print("U shape",u.shape)
+#         print("V shape",v.shape)
+        # columns of u, rows of v
+        max_abs_cols = np.argmax(np.abs(u), axis=0)
+        signs = np.sign(u[max_abs_cols, range(u.shape[1])])
+#         print("signs shape",signs.shape, "max", np.abs(u))
+#         print(signs)
+        u *= signs
+        v *= signs[:, np.newaxis]
+    else:
+        # rows of v, columns of u
+#         print("U shape",u.shape)
+#         print("V shape",v.shape)
+        max_abs_rows = np.argmax(np.abs(v), axis=1)
+#         print("max_abs_rows shape",max_abs_rows.shape)
+        signs = np.sign(v[range(v.shape[0]), max_abs_rows])
+#         print("signs shape",signs.shape)
+#         signs = np.atleast_2d(np.sign(v[range(v.shape[0]), max_abs_rows])).T
+        u *= signs
+        v *= signs[:, np.newaxis]
+    return u, v
+
+def SVD2(X,return_rank=2):
+#     U, s, Vh = np.linalg.svd(X,full_matrices=False)
+    U, s, Vh = randomized_svd(X, n_components=return_rank,random_state=1234)
+    U = U[:,0:return_rank]
+    Vh = Vh[0:return_rank,:]
+    s = s[0:return_rank]
+    
+    U, Vh = svd_flip(U, Vh, u_based_decision=True)
+    return U,s,Vh
+
+
+from sklearn.utils.extmath import randomized_svd
+def pcmf_full_consensus2(X_all, penalty_list, problem_rank=1, rho=1.0, admm_iters = 5, verb=False, weights=False, neighbors=None, gauss_coef=2.0,print_progress=True, parallel=False, output_file='NaN',factor_type='SVD', split_size=10):
+    '''
+    Fits fully constrained PCMF problem iterating between convex clustering and an SVD of rank 'problem_rank' 
+    using ADMM updates.
+    '''
+    print('weights: '+str(weights), 'neighbors: '+str(neighbors), 'gauss_coef: '+str(gauss_coef), 'rho: '+str(rho))
+    #
+    rho1 = rho2 = rho
+#     rho1 = rho - 0.02
+#     rho2 = rho
+
+    print("rho1:",rho1,"rho2",rho2)
+    # Data split
+    X_list = np.array_split(X_all, int(X_all.shape[0]/split_size), axis=0) # get batches
+    X_list_inds = np.array_split(np.arange(X_all.shape[0]), int(X_all.shape[0]/split_size), axis=0) # get batches
+    X = X_list[0]
+    num_obs = X.shape[0]
+    num_var = X.shape[1]
+    D, chol_factor = chol_D(num_obs, num_var, rho1, reg_scale=1.0+rho1) # note num_var is not used in chol_D
+    print("Number of batches:",len(X_list))
+    #
+    # Initialize
+    G = []
+    A = []
+    Z1 = []
+    Z2 = []
+    U = []
+    Vh = []
+    s = []
+    X_mean = []
+    weights_list = []
+
+    U, s, Vh = SVD2(X_all, problem_rank)
+    Vhorig = Vh
+#     U, s, Vh = randomized_svd(X_all, n_components=problem_rank,random_state=1234)
+    
+    for X, idx in zip(X_list, np.arange(len(X_list))):
+        print("Initialize IDX:",idx)
+        X_mean.append(X.mean(0))
+        X = X-np.mean(X,axis=0)
+        X_list[idx] = X
+        if weights is False:
+            weights = get_weights(X,gauss_coef=0.0)
+        else:
+            weights = get_weights(X,gauss_coef=gauss_coef, neighbors=neighbors)
+        weights_list.append(weights)
+        #
+        Ginit = Z1init = D*X
+        Ainit = Z2init = X.copy()
+        
+        Ginit = np.zeros_like(Ginit)
+        Z1init = np.zeros_like(Z1init)
+        
+        G.append(Ginit)
+        A.append(Ainit)
+        Z1.append(Z1init)
+        Z2.append(Z2init)
+    #
+    M = []
+    for X, idx in zip(X_list, np.arange(len(X_list))):
+        M.append(np.tile(X_mean[idx],(X_list[0].shape[0],1)))
+    M = np.vstack(M)
+    print("Means matrix has shape:", M.shape)
+#     print(M)
+    
+    for X, idx in zip(X_list, np.arange(len(X_list))):
+        X_inds = X_list_inds[idx]
+#         Z2[idx] = X_all[X_inds,:] #np.dot(U[X_inds]*s,Vh)
+#         Z2[idx] = X.copy() #np.dot(U[X_inds]*s,Vh)
+        A[idx] = np.dot(U[X_inds]*s,Vh)
+        Z2[idx] = np.dot(U[X_inds]*s,Vh)
+    
+    #
+    A_list = []
+    U_list = []
+    s_list = []
+    V_list = []
+    #
+    try:
+        # Iterate over penalty grid fitting problem for each value
+        for i in range(len(penalty_list)):
+            penalty = penalty_list[i]
+            num_obs = X.shape[0]
+            num_var = X.shape[1]
+            if print_progress == True:
+                if parallel == True:
+                    file1 = open(output_file, "a")
+                    file1.write(str([i+1])+" {:.5e}".format(penalty))
+                    file1.write("...")
+                    file1.close()
+                else:                                                     
+                    print("[",i+1,"]","{:.5e}".format(penalty), end="")
+                    print("...", end="")
+            for it in range(admm_iters):
+                for X, idx in zip(X_list, np.arange(len(X_list))):
+                    X_inds = X_list_inds[idx]
+                    A[idx] = chol_factor(X + rho*D.T*(G[idx] - Z1[idx]) + rho*(np.dot(U[X_inds]*s,Vh) - Z2[idx]))
+                    G[idx] = prox_numba_arr(np.zeros_like(G[idx]), D*A[idx]+Z1[idx], penalty, rho1, weights_list[idx])
+                #
+                # consensus
+                As = np.vstack(A)
+                Z2s = np.vstack(Z2)
+#                 U, s, Vh = SVD(As + Z2s, problem_rank)
+#                 print("Vh.shape:",Vh.shape)
+#                 print("Vh:",Vh[0,0:3])
+                B = As + Z2s
+                U_b, s_b, Vh_b = SVD2(B, problem_rank)
+#                 U_b, s_b, Vh_b = randomized_svd(B, n_components=problem_rank,random_state=1234)
+                U_a__s_a = np.dot(B + M, Vh_b.T)
+#                 print("Vh_b:",Vh_b[0,0:3])
+#                 print("U before:",U[0:3,0].T)
+                Vh = Vh_b
+                s = s_b
+                U = U_a__s_a / s
+                U = np.sqrt(1./np.sum(U**2)) * U
+#                 print("U_a__s_a:",U_a__s_a[0:3,0].T)
+#                 print("U after:",U[0:3,0].T)
+#                  for k in range(0,problem_rank):
+#                     U[:,k] = U_a__s_a[:,k] / s[k]
+#                     U[:,k] = np.sqrt(1./np.sum(U[:,k]**2)) * U[:,k]
+#                 print("U_a__s_a:",U_a__s_a[0:3,0].T)
+#                 print("U after:",U[0:3,0].T)
+#
+                if problem_rank > 0:
+                    for k in range(0,problem_rank):
+                        if np.round(s[k],1)<=0.2:
+                            U[:,k] = 0
+                            Vh[k,:] = 0
+                            s[k] = 0
+                        if penalty==np.inf:
+                            U[:,k] = 0
+                            Vh[k,:] = 0
+                            s[k] = 0
+    #                             U, Vh = V_flip(U, Vh, Vh_orig)
+#                         if np.sign(Vh[k,0]) != np.sign(Vhorig[k,0]):
+                        if np.sign(Vh[k,0]) == -1:
+                            U[:,k] = U[:,k] * -1
+                            Vh[k,:] = Vh[k,:] * -1
+#                         for idx in np.arange(1,len(X_list)):
+#                             if np.abs(np.mean(U[X_list_inds[0],k])) >= 0.01:
+#                                 if np.sign(np.mean(U[X_list_inds[idx],k])) == np.sign(np.mean(U[X_list_inds[0],k])):
+#                                     U[X_list_inds[idx],k] = U[X_list_inds[idx],k] * -1
+                                
+                Z2_update = rho2*(As - np.dot(U*s,Vh))
+                #
+                for X, idx in zip(X_list, np.arange(len(X_list))):
+                    X_inds = X_list_inds[idx]
+                    Z1[idx] = Z1[idx] + rho1*(D*A[idx] - G[idx])
+                    Z2[idx] = Z2[idx] + Z2_update[X_inds,:] # should this be Z2_update[X_inds,:]?
+#                     Z2[idx] = Z2[idx] + Z2_update[X_inds] # should this be Z2_update[X_inds,:]?
+
+            A_list.append(np.vstack(A))
+            V_list.append(np.vstack(Vh))
+            s_list.append(np.vstack(s))
+            U_list.append(np.vstack(U))
+            
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt has been caught.")
+        
+    return A_list, U_list, s_list, V_list
+
+
+
+
+
 ########################## New cluster fitting method using adjacency matrix #######################
 def diff_graph_cluster(Xhat, D, comb_list, num_clusters, thresh_sd=6, pca_clean=True, num_fits=1, verbose=False, use_adjacency=False):
-    '''
-    Given a PCMF data approximation 'Xhat' for a fixed lambda and a differencing matrix 'D', calculate the
-    difference variable graph as suggested in Chi and Lange JCGC (2015), clustering on the graph adjacency
-    matrix (or a PCA embedding of it if pca_clean=True).
+    '''
+    Given a PCMF data approximation 'Xhat' for a fixed lambda and a differencing matrix 'D', calculate the
+    difference variable graph as suggested in Chi and Lange JCGC (2015), clustering on the graph adjacency
+    matrix (or a PCA embedding of it if pca_clean=True).
 
-    Args:
-        Xhat - PCMF data approximation at a fixed penalty parameter.
-        D - a sparse differencing matrix given by 'sparse_D'.
-        comb_list - the combination indices returned by 'sparse_D'.
-        num_clusters - the number of clusters.
-        thresh_sd - a threshold standard deviation cuttoff for thresholding the difference graph.
-        pca_clean - boolean; should the PCA of the adjacency matrix be used for clustering.
-        num_fits - number of spectral clusterings to take the median of for output.
-        verbose - Print threshold adjustment; plot histogram graph edges and show GMM fit used to choose threshold.
+    Args:
+        Xhat - PCMF data approximation at a fixed penalty parameter.
+        D - a sparse differencing matrix given by 'sparse_D'.
+        comb_list - the combination indices returned by 'sparse_D'.
+        num_clusters - the number of clusters.
+        thresh_sd - a threshold standard deviation cuttoff for thresholding the difference graph.
+        pca_clean - boolean; should the PCA of the adjacency matrix be used for clustering.
+        num_fits - number of spectral clusterings to take the median of for output.
+        verbose - Print threshold adjustment; plot histogram graph edges and show GMM fit used to choose threshold.
 
-    '''
-    n,p = Xhat.shape
+    '''
+    n,p = Xhat.shape
 
-    # Get graph edges from distances, and estimate graph threshold from edge mode centered around zero
-    edges = np.sum(np.abs(D*Xhat),axis=1)
-    gmm = GaussianMixture(n_components = 6, max_iter=200, n_init=10).fit(edges.reshape(-1, 1))
-    zero_mode_idx = np.where(np.abs(gmm.means_)==np.min(np.abs(gmm.means_)))[0]
-    thresh = thresh_sd*np.sqrt(gmm.covariances_[zero_mode_idx])
+    # Get graph edges from distances, and estimate graph threshold from edge mode centered around zero
+    edges = np.sum(np.abs(D*Xhat),axis=1)
+    gmm = GaussianMixture(n_components = 6, max_iter=200, n_init=10).fit(edges.reshape(-1, 1))
+    zero_mode_idx = np.where(np.abs(gmm.means_)==np.min(np.abs(gmm.means_)))[0]
+    thresh = thresh_sd*np.sqrt(gmm.covariances_[zero_mode_idx])
 
-    # Make adjacency from sum of differences (and adjust threshold if necessary)
-    flag = True
-    while flag==True:
-        # Generate graph
-        G = nx.Graph()
-        for i,e in enumerate(edges):
-            if np.abs(e) < thresh:
-                G.add_edge(comb_list[i][0], comb_list[i][1])
-        A = nx.adjacency_matrix(G).toarray()
-        if verbose:
-            print('threshold:',thresh)
-        if A.shape[0] < Xhat.shape[0]:
-            thresh *= 1.1
-        else:
-            flag = False
+    # Make adjacency from sum of differences (and adjust threshold if necessary)
+    flag = True
+    while flag==True:
+        # Generate graph
+        G = nx.Graph()
+        for i,e in enumerate(edges):
+            if np.abs(e) < thresh:
+                G.add_edge(comb_list[i][0], comb_list[i][1])
+        A = nx.adjacency_matrix(G).toarray()
+        if verbose:
+            print('threshold:',thresh)
+        if A.shape[0] < Xhat.shape[0]:
+            thresh *= 1.1
+        else:
+            flag = False
 
-    if not use_adjacency:
-        deg = np.diag(np.sum(A, axis=1))
-        K = nx.modularity_matrix(G)
-        A = n*np.sqrt(deg)@K@np.sqrt(deg) # From RMT4ML pg 265
+    if not use_adjacency:
+        deg = np.diag(np.sum(A, axis=1))
+        K = nx.modularity_matrix(G)
+        A = n*np.sqrt(deg)@K@np.sqrt(deg) # From RMT4ML pg 265
 
-    # Apply spectral clustering, taking median of 'num_fits' tryes to get output labels
-    out_labels = []
-    for f in range(num_fits):
-        # Use PCA of A if 'pca_clean' flag set
-        if pca_clean:
-            uA, sA, vhA = np.linalg.svd(A)
-            spectral_clustering = SpectralClustering(n_clusters=num_clusters, random_state=20, affinity="nearest_neighbors", assign_labels="cluster_qr").fit(uA[:,0:num_clusters])
-            out_labels.append(spectral_clustering.labels_)
-        else:
-            spectral_clustering = SpectralClustering(n_clusters=num_clusters, random_state=20, affinity="nearest_neighbors", assign_labels="cluster_qr").fit(A)
-            out_labels.append(spectral_clustering.labels_)
+    # Apply spectral clustering, taking median of 'num_fits' tryes to get output labels
+    out_labels = []
+    for f in range(num_fits):
+        # Use PCA of A if 'pca_clean' flag set
+        if pca_clean:
+            uA, sA, vhA = np.linalg.svd(A)
+            spectral_clustering = SpectralClustering(n_clusters=num_clusters, random_state=20, affinity="nearest_neighbors", assign_labels="cluster_qr").fit(uA[:,0:num_clusters])
+            out_labels.append(spectral_clustering.labels_)
+        else:
+            spectral_clustering = SpectralClustering(n_clusters=num_clusters, random_state=20, affinity="nearest_neighbors", assign_labels="cluster_qr").fit(A)
+            out_labels.append(spectral_clustering.labels_)
 
-    # Plot thresholding histogram if 'plot_thresh_hist' is true
-    if verbose:
-        plt.figure(figsize=(10,5))
-        _ = plt.hist(edges,bins=100,density=True)
+    # Plot thresholding histogram if 'plot_thresh_hist' is true
+    if verbose:
+        plt.figure(figsize=(10,5))
+        _ = plt.hist(edges,bins=100,density=True)
 
-        f_axis = edges.copy().ravel()
-        f_axis.sort()
-        a = []
-        for weight, mean, covar in zip(gmm.weights_, gmm.means_, gmm.covariances_):
-            a.append(weight*norm.pdf(f_axis, mean, np.sqrt(covar)).ravel())
-            plt.plot(f_axis, a[-1])
-        plt.plot(f_axis, np.array(a).sum(axis=0), 'k-')
-        plt.xlabel('Variable')
-        plt.ylabel('PDF')
-        plt.tight_layout()
-        plt.show()
+        f_axis = edges.copy().ravel()
+        f_axis.sort()
+        a = []
+        for weight, mean, covar in zip(gmm.weights_, gmm.means_, gmm.covariances_):
+            a.append(weight*norm.pdf(f_axis, mean, np.sqrt(covar)).ravel())
+            plt.plot(f_axis, a[-1])
+        plt.plot(f_axis, np.array(a).sum(axis=0), 'k-')
+        plt.xlabel('Variable')
+        plt.ylabel('PDF')
+        plt.tight_layout()
+        plt.show()
 
-    return np.median(np.array(out_labels),axis=0)
+    return np.median(np.array(out_labels),axis=0)
 
 ########################## Predict and project on test data / new data #######################
-
 def PCMF_predict_clusters(X_test, X_train, V, p, true_clusters_train, PCMFtype='Full', true_clusters_test=None):# Get cluster PCA component
     '''Function to take held out test data and project it to PCA component and predict clusters
        Inputs:  X_test: n_test x p (already centered using np.mean(X_train, axis=0))
