@@ -889,7 +889,7 @@ def SVD2(X,return_rank=2):
 
 
 from sklearn.utils.extmath import randomized_svd
-def pcmf_full_consensus2(X_all, penalty_list, problem_rank=1, rho=1.0, admm_iters = 5, verb=False, weights=False, neighbors=None, gauss_coef=2.0,print_progress=True, parallel=False, output_file='NaN',factor_type='SVD', split_size=10):
+def pcmf_full_consensus_2023(X_all, penalty_list, problem_rank=1, rho=1.0, admm_iters = 5, verb=False, weights=False, neighbors=None, gauss_coef=2.0,print_progress=True, parallel=False, output_file='NaN',factor_type='SVD', split_size=10):
     '''
     Fits fully constrained PCMF problem iterating between convex clustering and an SVD of rank 'problem_rank' 
     using ADMM updates.
