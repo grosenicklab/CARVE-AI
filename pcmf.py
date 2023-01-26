@@ -1173,12 +1173,27 @@ def PCMF_predict_clusters(X_test, X_train, V, p, true_clusters_train, PCMFtype='
 
     if len(true_clusters_test)>1:
         # Check alignment to true clusters
-        cluster_acc = np.sum(true_clusters_test == true_clusters_test_predict) / len(true_clusters_test)
+        conf_mat_ord = confusion_matrix_ordered(true_clusters_test_predict,true_clusters_test)
+        cluster_acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
+        # cluster_acc = np.sum(true_clusters_test == true_clusters_test_predict) / len(true_clusters_test)
         print('Test set cluster accuracy:', cluster_acc)
     else:
         cluster_acc = []
 
     return XV_c, true_clusters_test_predict, XV_test, cluster_acc
+
+
+def confusion_matrix_ordered(pred, true):
+    from sklearn.metrics import confusion_matrix, accuracy_score
+    from scipy.optimize import linprog, linear_sum_assignment as linear_assignment
+    def _make_cost_m(cm):
+        s = np.max(cm)
+        return (- cm + s)
+    conf_mat = confusion_matrix(pred,true)
+    indexes = linear_assignment(_make_cost_m(conf_mat))
+    js = [e for e in sorted(indexes, key=lambda x: x[0])[1]]
+    conf_mat_ord = conf_mat[:, js]
+    return conf_mat_ord
 
 ########################## Clustering helper functions #######################
 
