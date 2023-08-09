@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import SpectralClustering
 
 # to use first run 'python setup.py build_ext --inplace'
-from admm_utils import prox as cprox
+# from admm_utils import prox as cprox
 # from p3ca import cluster_metrics
 
 from numba import jit, prange
