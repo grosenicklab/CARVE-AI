@@ -473,7 +473,8 @@ def fit_leiden_or_louvain(X_in, true_clusters_in, ctype='Leiden', neighbors=5):
     return labels, ari, nmi, acc
 
 def fit_gMADD(X, true_clusters, n_clusters):
-    '''gMADD clustering'''    #                                                                                                          
+    '''gMADD clustering'''    #
+    import rpy2.robjects as robjects                                                                                       
     from rpy2.robjects.packages import importr
     base = importr('base')
     utils = importr('utils')
@@ -534,6 +535,7 @@ def fit_elasticsubspace(X, true_clusters, n_clusters,elasticsubpace_path='/Users
 
 def fit_hddc(X, true_clusters, n_clusters):
     '''HDDC clustering'''    #
+    import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
     base = importr('base')
     utils = importr('utils')
@@ -563,6 +565,7 @@ def fit_hddc(X, true_clusters, n_clusters):
 
 def fit_GMCM(X, true_clusters, n_clusters):
     '''GMCM clustering'''    #
+    import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
     base = importr('base')
     utils = importr('utils')
@@ -598,6 +601,7 @@ def fit_GMCM(X, true_clusters, n_clusters):
 
 def fit_mixglasso(X, true_clusters, n_clusters):
     '''mixGlasso clustering'''    #
+    import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
     base = importr('base')
     utils = importr('utils')
@@ -626,6 +630,7 @@ def fit_mixglasso(X, true_clusters, n_clusters):
 
 def fit_VarSel(X, true_clusters, n_clusters, num_cores):
     '''VarSel with variable selection clustering'''    #
+    import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
     base = importr('base')
     utils = importr('utils')
@@ -680,6 +685,7 @@ def fit_cca_carp(X, Y, true_clusters, n_clusters, n_components=1):
 
 def fit_carp(X, true_clusters, n_clusters):
     '''CARP clustering'''    #
+    import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
     base = importr('base')
     utils = importr('utils')
@@ -708,6 +714,7 @@ def fit_carp(X, true_clusters, n_clusters):
 
 def fit_cbass(X, true_clusters, n_clusters):
     '''CBASS clustering'''    #
+    import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
     base = importr('base')
     utils = importr('utils')

@@ -35,6 +35,7 @@ from IPython.display import HTML
 import rpy2
 
 from torch.utils.data import Dataset
+import h5py
 
 def load_macaqueLGNrnaseq(data_path='/Users/amandabuch/Documents/2_Research/Postdoc/Code/PhaseTransitions/Datasets/data/', plot=False, skip=1, batch_size=50, randomize=False):
     import numpy as np
@@ -944,10 +945,25 @@ def load_COVID(path='./results/pcmf_approx_uV_COVIDCancer_genomics_run_gausscoef
 
 def load_mouseorgans(path='/Users/amandabuch/Documents/clusterCCA/revision1/clusterCCA/data/'):
     # f = np.load(path, allow_pickle=True)
-    f=h5py.File(data_path+'mouse_organs.h5','r')
-    labels = np.load(data_path+'mouse_organs_labels.npz', allow_pickle=True)
+    import h5py
+    f=h5py.File(path+'mouse_organs.h5','r')
+    labels = np.load(path+'mouse_organs_labels.npz', allow_pickle=True)
+    # print(list(f.keys()), list(labels.keys()))
 
-    x,y = f['X'], labels
+    # Xtr = f['training_data_scaled']
+    # Xts = f['test_data_scaled']
+    # Xall = np.concatenate((Xtr,Xts))
+    # Ytr = labels['training_labels']
+    # Yts = labels['test_labels']
+    # Yall = np.concatenate((Ytr,Yts))
+    # n,p = Xall.shape
+    # x,y = Xall, Yall
+
+    rows_skip = 50
+    training_data_scaled_subset = f['training_data_scaled'][::rows_skip]
+    training_labels_subset = labels['training_labels'][::rows_skip]
+    x,y = training_data_scaled_subset, training_labels_subset
+
     f.close()
     x = x.astype(np.float32)
     y = pd.factorize(y)[0].astype(np.int32)
@@ -1011,17 +1027,35 @@ def load_mouseorgans_MV(path='/Users/amandabuch/Documents/clusterCCA/revision1/c
     import scanpy as sc
     from anndata import AnnData
     # f = np.load(path, allow_pickle=True)
-    f=h5py.File(data_path+'mouse_organs.h5','r')
-    labels = np.load(data_path+'mouse_organs_labels.npz', allow_pickle=True)
+    f=h5py.File(path+'mouse_organs.h5','r')
+    labels = np.load(path+'mouse_organs_labels.npz', allow_pickle=True)
+    f=h5py.File(path+'mouse_organs.h5','r')
+    labels = np.load(path+'mouse_organs_labels.npz', allow_pickle=True)
+    # print(list(f.keys()), list(labels.keys()))
 
-    x,y = f['X'], labels
+    # Xtr = f['training_data_scaled']
+    # Xts = f['test_data_scaled']
+    # Xall = np.concatenate((Xtr,Xts))
+    # Ytr = labels['training_labels']
+    # Yts = labels['test_labels']
+    # Yall = np.concatenate((Ytr,Yts))
+    # n,p = Xall.shape
+    # x,y = Xall, Yall
+
+    rows_skip = 50
+    training_data_scaled_subset = f['training_data_scaled'][::rows_skip]
+    training_labels_subset = labels['training_labels'][::rows_skip]
+    x,y = training_data_scaled_subset, training_labels_subset
+
     f.close()
     x = x.astype(np.float32)
     y = pd.factorize(y)[0].astype(np.int32)
 
     dataset = anyDataset(datatype='mouseorgans')
-    X = dataset.x[:,0:500] #[:,0:1000]
-    Y = dataset.x[:,500:1500] #[:,1000:dataset.x.shape[1]]
+    X = dataset.x[:,0:1000] #[:,0:1000]
+    Y = dataset.x[:,1001:1100] #[:,1000:dataset.x.shape[1]]
+    # X = dataset.x[:,0:500] #[:,0:1000]
+    # Y = dataset.x[:,500:1500] #[:,1000:dataset.x.shape[1]]
     true_clusters = dataset.y
 
     print('mouseorgans mv samples', X.shape, Y.shape)
@@ -1038,8 +1072,10 @@ def load_NCI_MV(path='Users/amandabuch/Documents/clusterCCA/revision1/clusterCCA
     y = pd.factorize(y)[0].astype(np.int32)
 
     dataset = anyDataset(datatype='NCI')
-    X = dataset.x[:,0:500] #[:,0:1000]
-    Y = dataset.x[:,500:1500] #[:,1000:dataset.x.shape[1]]
+    X = dataset.x[:,0:1000] #[:,0:1000]
+    Y = dataset.x[:,1001:1100] #[:,1000:dataset.x.shape[1]]
+    # X = dataset.x[:,0:500] #[:,0:1000]
+    # Y = dataset.x[:,500:1500] #[:,1000:dataset.x.shape[1]]
     true_clusters = dataset.y
 
     print('NCI mv samples', X.shape, Y.shape)
@@ -1056,8 +1092,10 @@ def load_gbmBreastLung_MV(path='Users/amandabuch/Documents/clusterCCA/revision1/
     y = pd.factorize(y)[0].astype(np.int32)
 
     dataset = anyDataset(datatype='gbmBreastLung')
-    X = dataset.x[:,0:500] # why is this different than NCI?
-    Y = dataset.x[:,1000:1500] # why is this different than NCI?
+    X = dataset.x[:,0:1000] # why is this different than NCI?
+    Y = dataset.x[:,1001:1100] # why is this different than NCI?
+    # X = dataset.x[:,0:500] # why is this different than NCI?
+    # Y = dataset.x[:,1000:1500] # why is this different than NCI?
     true_clusters = dataset.y
 
     print('gbmBreastLung mv samples', X.shape, Y.shape)
@@ -1075,7 +1113,9 @@ def load_SRBCT_MV(path='Users/amandabuch/Documents/clusterCCA/revision1/clusterC
 
     dataset = anyDataset(datatype='SRBCT')
     X = dataset.x[:,0:1000] # why is this different than NCI?
-    Y = dataset.x[:,1000:1100] # why is this different than NCI?
+    Y = dataset.x[:,1001:1100] # why is this different than NCI?
+    # X = dataset.x[:,0:1000] # why is this different than NCI?
+    # Y = dataset.x[:,1000:1100] # why is this different than NCI?
     true_clusters = dataset.y
 
     print('SRBCT mv samples', X.shape, Y.shape)
