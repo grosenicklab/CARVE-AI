@@ -3502,7 +3502,7 @@ def fit_dec(X_in, true_clusters_in, batch_size_options=[15, 30], finetune_iters_
                             acc = np.nan
                             print('failed to converge')
 
-                        if !np.isnan(acc):
+                        if ~np.isnan(acc):
                             # Calculate accuracy
                             conf_mat_ord = confusion_matrix_ordered(labels,Y)
                             acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
