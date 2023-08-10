@@ -3048,7 +3048,8 @@ try:
     from tensorflow.keras.optimizers.legacy import SGD
 except:
     try:
-        from tensorflow.keras.optimizers import SGD
+    	from keras.optimizers import SGD
+        # from tensorflow.keras.optimizers import SGD
     except:
         from keras.optimizers import SGD
 
@@ -3484,8 +3485,9 @@ def fit_dec(X_in, true_clusters_in, batch_size_options=[15, 30], finetune_iters_
                     for cluster_iter_max in cluster_iter_max_options:
                         # print('batch_size',batch_size ,'finetune_iters',finetune_iters, 'cluster_iter_max:', cluster_iter_max)
                         c = DeepEmbeddingClustering(n_clusters=len(np.unique(Y)), input_dim=X.shape[1], batch_size=batch_size)
-                        c.initialize(X, finetune_iters=finetune_iters, layerwise_pretrain_iters=1000)
-
+                        c.initialize(X, finetune_iters=finetune_iters, layerwise_pretrain_iters=layerwise_pretrain_iters)
+                        print(np.unique(Y))
+                        print(np.max(X))
                         labels = c.cluster(X, y=Y, iter_max=100)
                         # print(c.accuracy)
 
