@@ -6,7 +6,7 @@ def load_data(X_in,true_clusters_in):
     from sklearn.preprocessing import Normalizer, StandardScaler, MinMaxScaler
     scalerX = StandardScaler()
     scalerX.fit(X_in)
-    x = scalerX.transform(X_in).astype(np.float32)
+    x = scalerX.transform(X_in).astype(np.float64) #np.float32
 
     y = pd.factorize(true_clusters_in)[0].astype(np.int32)
     print(y.shape)
@@ -3332,7 +3332,7 @@ class DeepEmbeddingClustering(object):
                 self.p = self.p_mat(self.q)
 
                 y_pred = self.q.argmax(1)
-                delta_label = ((y_pred == self.y_pred).sum().astype(np.float32) / y_pred.shape[0])
+                delta_label = ((y_pred == self.y_pred).sum().astype(np.float64) / y_pred.shape[0]) #np.float32
                 if y is not None:
 #                     acc, w = self.cluster_acc(y, y_pred)
                     acc = self.cluster_acc(y, y_pred)[0]
@@ -3473,7 +3473,7 @@ def fit_dec(X_in, true_clusters_in, batch_size_options=[15, 30], finetune_iters_
     scalerX.fit(X_in)
 
     # RUN DEC Grid Search
-    X = scalerX.transform(X_in).astype(np.float32)
+    X = scalerX.transform(X_in).astype(np.float64) #np.float32
     Y = true_clusters_in.astype(np.int32)
     print(X.shape)
 
