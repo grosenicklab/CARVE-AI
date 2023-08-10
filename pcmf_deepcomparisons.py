@@ -3267,7 +3267,10 @@ class DeepEmbeddingClustering(object):
             kmeans = KMeans(n_clusters=self.n_clusters, n_init=20)
             print('predicting')
             print('encoder',self.encoder.predict(X))
-            self.y_pred = kmeans.fit_predict(self.encoder.predict(X))
+            try:
+                self.y_pred = kmeans.fit_predict(self.encoder.predict(X))
+            except:
+                return
             self.cluster_centres = kmeans.cluster_centers_
 
         # prepare DEC model
@@ -3488,22 +3491,24 @@ def fit_dec(X_in, true_clusters_in, batch_size_options=[15, 30], finetune_iters_
             for layerwise_pretrain_iters in layerwise_pretrain_iters_options:
                     for cluster_iter_max in cluster_iter_max_options:
                         # print('batch_size',batch_size ,'finetune_iters',finetune_iters, 'cluster_iter_max:', cluster_iter_max)
-                        try:
                             c = DeepEmbeddingClustering(n_clusters=len(np.unique(Y)), input_dim=X.shape[1], batch_size=batch_size)
                             c.initialize(X, finetune_iters=finetune_iters, layerwise_pretrain_iters=layerwise_pretrain_iters)
                             print(np.unique(Y))
                             print(np.max(X))
+                        try:
                             labels = c.cluster(X, y=Y, iter_max=cluster_iter_max)
                             # print(c.accuracy)
+                        except:
+                            acc = np.nan
+                            print('failed to converge')
 
+                        if !np.isnan(acc):
                             # Calculate accuracy
                             conf_mat_ord = confusion_matrix_ordered(labels,Y)
                             acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
                             print('IDX:',idx, 'Accuracy:', acc, 'Batch size:',batch_size, 'finetune_iters:',finetune_iters, 'layerwise_pretrain_iters:',layerwise_pretrain_iters, 'cluster_iter_max:',cluster_iter_max)
                             idx = idx+1
-                        except:
-                            print('failed to converge')
-                            acc = np.nan
+                            
                         accuracies.append([idx, acc, batch_size, finetune_iters, layerwise_pretrain_iters, cluster_iter_max,])
 
                         # make it so string returned is the best accuracy...
