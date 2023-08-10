@@ -3491,10 +3491,10 @@ def fit_dec(X_in, true_clusters_in, batch_size_options=[15, 30], finetune_iters_
             for layerwise_pretrain_iters in layerwise_pretrain_iters_options:
                     for cluster_iter_max in cluster_iter_max_options:
                         # print('batch_size',batch_size ,'finetune_iters',finetune_iters, 'cluster_iter_max:', cluster_iter_max)
-                            c = DeepEmbeddingClustering(n_clusters=len(np.unique(Y)), input_dim=X.shape[1], batch_size=batch_size)
-                            c.initialize(X, finetune_iters=finetune_iters, layerwise_pretrain_iters=layerwise_pretrain_iters)
-                            print(np.unique(Y))
-                            print(np.max(X))
+                        c = DeepEmbeddingClustering(n_clusters=len(np.unique(Y)), input_dim=X.shape[1], batch_size=batch_size)
+                        c.initialize(X, finetune_iters=finetune_iters, layerwise_pretrain_iters=layerwise_pretrain_iters)
+                        print(np.unique(Y))
+                        print(np.max(X))
                         try:
                             labels = c.cluster(X, y=Y, iter_max=cluster_iter_max)
                             # print(c.accuracy)
