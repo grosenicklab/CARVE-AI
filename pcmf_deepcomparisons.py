@@ -3494,28 +3494,27 @@ def fit_dec(X_in, true_clusters_in, batch_size_options=[15, 30], finetune_iters_
                         c.initialize(X, finetune_iters=finetune_iters, layerwise_pretrain_iters=layerwise_pretrain_iters)
                         print(np.unique(Y))
                         print(np.max(X))
-                        acc = None
+#                         acc = None
                         try:
                             labels = c.cluster(X, y=Y, iter_max=cluster_iter_max)
-                            # print(c.accuracy)
+                            print('ACC', c.accuracy)
+
+                        # Calculate accuracy
+                            conf_mat_ord = confusion_matrix_ordered(labels,Y)
+                            acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
                         except:
                             acc = np.nan
                             print('failed to converge')
-
-                        if ~np.isnan(acc):
-                            # Calculate accuracy
-                            conf_mat_ord = confusion_matrix_ordered(labels,Y)
-                            acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
-                            print('IDX:',idx, 'Accuracy:', acc, 'Batch size:',batch_size, 'finetune_iters:',finetune_iters, 'layerwise_pretrain_iters:',layerwise_pretrain_iters, 'cluster_iter_max:',cluster_iter_max)
-                            idx = idx+1
                             
+                        print('IDX:',idx, 'Accuracy:', acc, 'Batch size:',batch_size, 'finetune_iters:',finetune_iters, 'layerwise_pretrain_iters:',layerwise_pretrain_iters, 'cluster_iter_max:',cluster_iter_max)
+                        idx = idx+1
                         accuracies.append([idx, acc, batch_size, finetune_iters, layerwise_pretrain_iters, cluster_iter_max,])
                         del acc 
                         # make it so string returned is the best accuracy...
         # pd.DataFrame(accuracies, columns = ['idx','Accuracy', 'BatchSize','finetune_iters', 'layerwise_pretrain_iters', 'cluster_iter_max'])
     toc = time.time() - tic
     print('Time elapsed:',toc)
-    return accuracies, toc, 'IDX: '+str(idx)+' Accuracy: '+str(acc)+' Batch size: '+str(batch_size)+' finetune_iters: '+str(finetune_iters)+' layerwise_pretrain_iters: '+str(layerwise_pretrain_iters)+' cluster_iter_max: '+str(cluster_iter_max)
+    return accuracies, toc #, 'IDX: '+str(idx)+' Accuracy: '+str(acc)+' Batch size: '+str(batch_size)+' finetune_iters: '+str(finetune_iters)+' layerwise_pretrain_iters: '+str(layerwise_pretrain_iters)+' cluster_iter_max: '+str(cluster_iter_max)
 
 
 
