@@ -6,7 +6,7 @@ def load_data(X_in,true_clusters_in):
     from sklearn.preprocessing import Normalizer, StandardScaler, MinMaxScaler
     scalerX = StandardScaler()
     scalerX.fit(X_in)
-    x = scalerX.transform(X_in).astype(np.float64) #np.float32
+    x = scalerX.transform(X_in).astype(np.float32) #np.float32
 
     y = pd.factorize(true_clusters_in)[0].astype(np.int32)
     print(y.shape)
@@ -348,7 +348,7 @@ def train_idec(model,dataset,args,pretrain_epochs=200,train_epochs=100,device='c
 
             # evaluate clustering performance
             y_pred = tmp_q.cpu().numpy().argmax(1)
-            delta_label = np.sum(y_pred != y_pred_last).astype(np.float64) / y_pred.shape[0] #np.float32
+            delta_label = np.sum(y_pred != y_pred_last).astype(np.float32) / y_pred.shape[0] #np.float32
             y_pred_last = y_pred
 
             acc = cluster_acc(y, y_pred)
@@ -702,9 +702,9 @@ def normalize_scanpy(adata, batch_key = None, n_high_var = 1000, LVG = True,
         batch = list(adata.obs[batch_key])
         batch = convert_vector_to_encoding(batch)
         batch = np.asarray(batch)
-        batch = batch.astype('float64') #float32
+        batch = batch.astype('float32') #float32
     else:
-        batch = np.ones((n,), dtype = 'float64') #float32
+        batch = np.ones((n,), dtype = 'float32') #float32
         norm_by_batch = False
         
     sc.pp.filter_genes(adata, min_counts=1)
@@ -776,7 +776,7 @@ def normalize_scanpy(adata, batch_key = None, n_high_var = 1000, LVG = True,
     y = np.unique(batch)
     num_batch = len(y)
     
-    adata.obs['size factors'] = size_factors.astype('float64') #float32
+    adata.obs['size factors'] = size_factors.astype('float32') #float32
     adata.obs['batch'] = batch
     adata.uns['num_batch'] = num_batch
     
@@ -915,7 +915,7 @@ import os
 from copy import deepcopy
 from time import time
 
-set_floatx('float64') #float32
+set_floatx('float32') #float32
 
 class CarDEC_Model(Model):
     def __init__(self, adata, dims, LVG_dims = None, tol = 0.005, n_clusters = None, random_seed = 201809, 
@@ -1005,7 +1005,7 @@ class CarDEC_Model(Model):
         self.preclust_denoised = self.sae.denoise(adata, batch_size)
                 
         if not set_centroids:
-            self.init_centroid = np.zeros((n_clusters, self.dims[-1]), dtype = 'float64') #float32
+            self.init_centroid = np.zeros((n_clusters, self.dims[-1]), dtype = 'float32') #float32
             self.n_clusters = n_clusters
             self.init_pred = np.zeros((adata.shape[0], dims[-1]))
             
@@ -1271,7 +1271,7 @@ class CarDEC_Model(Model):
         
         input_ds = simpleloader(adata.layers["normalized input"][:, adata.var['Variance Type'] == 'HVG'], batch_size)
         
-        embedding = np.zeros((adata.shape[0], self.dims[-1]), dtype = 'float64') #float32
+        embedding = np.zeros((adata.shape[0], self.dims[-1]), dtype = 'float32') #float32
         start = 0
 
         for x in input_ds:
@@ -1297,7 +1297,7 @@ class CarDEC_Model(Model):
         
         input_ds = simpleloader(adata.layers["normalized input"][:, adata.var['Variance Type'] == 'LVG'], batch_size)
 
-        LVG_embedded = np.zeros((adata.shape[0], self.LVG_dims[-1]), dtype = 'float64') #float32
+        LVG_embedded = np.zeros((adata.shape[0], self.LVG_dims[-1]), dtype = 'float32') #float32
         start = 0
 
         for x in input_ds:
@@ -1320,7 +1320,7 @@ class CarDEC_Model(Model):
         
         if not denoise:
             input_ds = simpleloader(adata.layers["normalized input"][:, adata.var['Variance Type'] == 'HVG'], batch_size)
-            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float64') #float32
+            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float32') #float32
             
             start = 0     
             for x in input_ds:
@@ -1337,8 +1337,8 @@ class CarDEC_Model(Model):
                         adata.obsm['LVG embedding'] = self.embed_LVG(adata, batch_size)
             input_ds = tupleloader(adata.obsm["embedding"], adata.obsm["LVG embedding"], batch_size = batch_size)
             
-            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float64') #float32
-            adata.layers["denoised"] = np.zeros(adata.shape, dtype = 'float64') #float32
+            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float32') #float32
+            adata.layers["denoised"] = np.zeros(adata.shape, dtype = 'float32') #float32
             
             start = 0     
             for input_ in input_ds:
@@ -1357,8 +1357,8 @@ class CarDEC_Model(Model):
                 adata.obsm['embedding'] = self.embed(adata, batch_size)
             input_ds = simpleloader(adata.obsm["embedding"], batch_size)
             
-            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float64') #float32
-            adata.layers["denoised"] = np.zeros(adata.shape, dtype = 'float64') #float32
+            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float32') #float32
+            adata.layers["denoised"] = np.zeros(adata.shape, dtype = 'float32') #float32
             
             start = 0
             
@@ -1450,7 +1450,7 @@ class CarDEC_Model(Model):
                         outfile.close()
             
             # check stop criterion
-            delta_label = np.sum(y_pred != y_pred_last).astype(np.float64) / y_pred.shape[0] #float32
+            delta_label = np.sum(y_pred != y_pred_last).astype(np.float32) / y_pred.shape[0] #float32
             y_pred_last = deepcopy(y_pred)
             
             current_aeloss_val = current_aeloss_val.numpy()
@@ -3331,7 +3331,7 @@ class DeepEmbeddingClustering(object):
                 self.p = self.p_mat(self.q)
 
                 y_pred = self.q.argmax(1)
-                delta_label = ((y_pred == self.y_pred).sum().astype(np.float64) / y_pred.shape[0]) #np.float32
+                delta_label = ((y_pred == self.y_pred).sum().astype(np.float32) / y_pred.shape[0]) #np.float32
                 if y is not None:
 #                     acc, w = self.cluster_acc(y, y_pred)
                     acc = self.cluster_acc(y, y_pred)[0]
@@ -3472,7 +3472,7 @@ def fit_dec(X_in, true_clusters_in, batch_size_options=[15, 30], finetune_iters_
     scalerX.fit(X_in)
 
     # RUN DEC Grid Search
-    X = scalerX.transform(X_in).astype(np.float64) #np.float32
+    X = scalerX.transform(X_in).astype(np.float32) #np.float32
     Y = true_clusters_in.astype(np.int32)
     print(X.shape)
 
@@ -3488,19 +3488,22 @@ def fit_dec(X_in, true_clusters_in, batch_size_options=[15, 30], finetune_iters_
             for layerwise_pretrain_iters in layerwise_pretrain_iters_options:
                     for cluster_iter_max in cluster_iter_max_options:
                         # print('batch_size',batch_size ,'finetune_iters',finetune_iters, 'cluster_iter_max:', cluster_iter_max)
-                        c = DeepEmbeddingClustering(n_clusters=len(np.unique(Y)), input_dim=X.shape[1], batch_size=batch_size)
-                        c.initialize(X, finetune_iters=finetune_iters, layerwise_pretrain_iters=layerwise_pretrain_iters)
-                        print(np.unique(Y))
-                        print(np.max(X))
-                        labels = c.cluster(X, y=Y, iter_max=100)
-                        # print(c.accuracy)
+                        try:
+                            c = DeepEmbeddingClustering(n_clusters=len(np.unique(Y)), input_dim=X.shape[1], batch_size=batch_size)
+                            c.initialize(X, finetune_iters=finetune_iters, layerwise_pretrain_iters=layerwise_pretrain_iters)
+                            print(np.unique(Y))
+                            print(np.max(X))
+                            labels = c.cluster(X, y=Y, iter_max=cluster_iter_max)
+                            # print(c.accuracy)
 
-                        # Calculate accuracy
-                        conf_mat_ord = confusion_matrix_ordered(labels,Y)
-                        acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
-                        print('IDX:',idx, 'Accuracy:', acc, 'Batch size:',batch_size, 'finetune_iters:',finetune_iters, 'layerwise_pretrain_iters:',layerwise_pretrain_iters, 'cluster_iter_max:',cluster_iter_max)
-                        idx = idx+1
-                        
+                            # Calculate accuracy
+                            conf_mat_ord = confusion_matrix_ordered(labels,Y)
+                            acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
+                            print('IDX:',idx, 'Accuracy:', acc, 'Batch size:',batch_size, 'finetune_iters:',finetune_iters, 'layerwise_pretrain_iters:',layerwise_pretrain_iters, 'cluster_iter_max:',cluster_iter_max)
+                            idx = idx+1
+                        except:
+                            print('failed to converge')
+                            acc = np.nan
                         accuracies.append([idx, acc, batch_size, finetune_iters, layerwise_pretrain_iters, cluster_iter_max,])
 
                         # make it so string returned is the best accuracy...
