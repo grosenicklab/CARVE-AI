@@ -3266,6 +3266,8 @@ class DeepEmbeddingClustering(object):
         if self.cluster_centres is None:
             print('setting cluster centers')
             kmeans = KMeans(n_clusters=self.n_clusters, n_init=20)
+            print('predicting')
+            print('encoder',self.encoder.predict(X))
             self.y_pred = kmeans.fit_predict(self.encoder.predict(X))
             self.cluster_centres = kmeans.cluster_centers_
 
