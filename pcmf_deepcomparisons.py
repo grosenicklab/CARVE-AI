@@ -3048,7 +3048,7 @@ try:
     from tensorflow.keras.optimizers.legacy import SGD
 except:
     try:
-    	from keras.optimizers import SGD
+        from keras.optimizers import SGD
         # from tensorflow.keras.optimizers import SGD
     except:
         from keras.optimizers import SGD
@@ -3264,7 +3264,7 @@ class DeepEmbeddingClustering(object):
         # initialize cluster centres using k-means
         print('Initializing cluster centres with k-means.')
         if self.cluster_centres is None:
-        	print('setting cluster centers')
+            print('setting cluster centers')
             kmeans = KMeans(n_clusters=self.n_clusters, n_init=20)
             self.y_pred = kmeans.fit_predict(self.encoder.predict(X))
             self.cluster_centres = kmeans.cluster_centers_
