@@ -3043,9 +3043,14 @@ from tensorflow.keras.layers import Layer, InputSpec
 
 from keras.models import Model, Sequential
 from keras.layers import Dense, Dropout, Input
-# from keras.optimizers import SGD
-# from tensorflow.keras.optimizers import SGD
-from tensorflow.keras.optimizers.legacy import SGD
+
+try:
+    from tensorflow.keras.optimizers.legacy import SGD
+except:
+    try:
+        from tensorflow.keras.optimizers import SGD
+    except:
+        from keras.optimizers import SGD
 
 from sklearn.preprocessing import normalize
 from keras.callbacks import LearningRateScheduler
@@ -3432,9 +3437,14 @@ def fit_dec(X_in, true_clusters_in, batch_size_options=[15, 30], finetune_iters_
 
     from keras.models import Model, Sequential
     from keras.layers import Dense, Dropout, Input
-    # from keras.optimizers import SGD
-    # from tensorflow.keras.optimizers import SGD
-    from tensorflow.keras.optimizers.legacy import SGD
+
+    try:
+        from tensorflow.keras.optimizers.legacy import SGD
+    except:
+        try:
+            from tensorflow.keras.optimizers import SGD
+        except:
+            from keras.optimizers import SGD
 
     from sklearn.preprocessing import normalize
     from keras.callbacks import LearningRateScheduler
