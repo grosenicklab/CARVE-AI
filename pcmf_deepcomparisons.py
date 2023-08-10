@@ -3485,7 +3485,7 @@ def fit_dec(X_in, true_clusters_in, batch_size_options=[15, 30], finetune_iters_
     # cluster_iter_max_options = [10] #[100, 200]
     idx = 0
     accuracies = []
-
+    acc = []
     for batch_size in batch_size_options:
         for finetune_iters in finetune_iters_options:
             for layerwise_pretrain_iters in layerwise_pretrain_iters_options:
