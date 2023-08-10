@@ -348,8 +348,7 @@ def train_idec(model,dataset,args,pretrain_epochs=200,train_epochs=100,device='c
 
             # evaluate clustering performance
             y_pred = tmp_q.cpu().numpy().argmax(1)
-            delta_label = np.sum(y_pred != y_pred_last).astype(
-                np.float32) / y_pred.shape[0]
+            delta_label = np.sum(y_pred != y_pred_last).astype(np.float64) / y_pred.shape[0] #np.float32
             y_pred_last = y_pred
 
             acc = cluster_acc(y, y_pred)
@@ -703,9 +702,9 @@ def normalize_scanpy(adata, batch_key = None, n_high_var = 1000, LVG = True,
         batch = list(adata.obs[batch_key])
         batch = convert_vector_to_encoding(batch)
         batch = np.asarray(batch)
-        batch = batch.astype('float32')
+        batch = batch.astype('float64') #float32
     else:
-        batch = np.ones((n,), dtype = 'float32')
+        batch = np.ones((n,), dtype = 'float64') #float32
         norm_by_batch = False
         
     sc.pp.filter_genes(adata, min_counts=1)
@@ -777,7 +776,7 @@ def normalize_scanpy(adata, batch_key = None, n_high_var = 1000, LVG = True,
     y = np.unique(batch)
     num_batch = len(y)
     
-    adata.obs['size factors'] = size_factors.astype('float32')
+    adata.obs['size factors'] = size_factors.astype('float64') #float32
     adata.obs['batch'] = batch
     adata.uns['num_batch'] = num_batch
     
@@ -916,7 +915,7 @@ import os
 from copy import deepcopy
 from time import time
 
-set_floatx('float32')
+set_floatx('float64') #float32
 
 class CarDEC_Model(Model):
     def __init__(self, adata, dims, LVG_dims = None, tol = 0.005, n_clusters = None, random_seed = 201809, 
@@ -1006,7 +1005,7 @@ class CarDEC_Model(Model):
         self.preclust_denoised = self.sae.denoise(adata, batch_size)
                 
         if not set_centroids:
-            self.init_centroid = np.zeros((n_clusters, self.dims[-1]), dtype = 'float32')
+            self.init_centroid = np.zeros((n_clusters, self.dims[-1]), dtype = 'float64') #float32
             self.n_clusters = n_clusters
             self.init_pred = np.zeros((adata.shape[0], dims[-1]))
             
@@ -1272,7 +1271,7 @@ class CarDEC_Model(Model):
         
         input_ds = simpleloader(adata.layers["normalized input"][:, adata.var['Variance Type'] == 'HVG'], batch_size)
         
-        embedding = np.zeros((adata.shape[0], self.dims[-1]), dtype = 'float32')
+        embedding = np.zeros((adata.shape[0], self.dims[-1]), dtype = 'float64') #float32
         start = 0
 
         for x in input_ds:
@@ -1298,7 +1297,7 @@ class CarDEC_Model(Model):
         
         input_ds = simpleloader(adata.layers["normalized input"][:, adata.var['Variance Type'] == 'LVG'], batch_size)
 
-        LVG_embedded = np.zeros((adata.shape[0], self.LVG_dims[-1]), dtype = 'float32')
+        LVG_embedded = np.zeros((adata.shape[0], self.LVG_dims[-1]), dtype = 'float64') #float32
         start = 0
 
         for x in input_ds:
@@ -1321,7 +1320,7 @@ class CarDEC_Model(Model):
         
         if not denoise:
             input_ds = simpleloader(adata.layers["normalized input"][:, adata.var['Variance Type'] == 'HVG'], batch_size)
-            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float32')
+            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float64') #float32
             
             start = 0     
             for x in input_ds:
@@ -1338,8 +1337,8 @@ class CarDEC_Model(Model):
                         adata.obsm['LVG embedding'] = self.embed_LVG(adata, batch_size)
             input_ds = tupleloader(adata.obsm["embedding"], adata.obsm["LVG embedding"], batch_size = batch_size)
             
-            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float32')
-            adata.layers["denoised"] = np.zeros(adata.shape, dtype = 'float32')
+            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float64') #float32
+            adata.layers["denoised"] = np.zeros(adata.shape, dtype = 'float64') #float32
             
             start = 0     
             for input_ in input_ds:
@@ -1358,8 +1357,8 @@ class CarDEC_Model(Model):
                 adata.obsm['embedding'] = self.embed(adata, batch_size)
             input_ds = simpleloader(adata.obsm["embedding"], batch_size)
             
-            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float32')
-            adata.layers["denoised"] = np.zeros(adata.shape, dtype = 'float32')
+            adata.obsm["cluster memberships"] = np.zeros((adata.shape[0], self.n_clusters), dtype = 'float64') #float32
+            adata.layers["denoised"] = np.zeros(adata.shape, dtype = 'float64') #float32
             
             start = 0
             
@@ -1451,7 +1450,7 @@ class CarDEC_Model(Model):
                         outfile.close()
             
             # check stop criterion
-            delta_label = np.sum(y_pred != y_pred_last).astype(np.float32) / y_pred.shape[0]
+            delta_label = np.sum(y_pred != y_pred_last).astype(np.float64) / y_pred.shape[0] #float32
             y_pred_last = deepcopy(y_pred)
             
             current_aeloss_val = current_aeloss_val.numpy()
@@ -1774,8 +1773,8 @@ def NBloss(count, output, eps = 1e-10, mean = True):
     - nbloss: `tf.Tensor`, The loss computed for the minibatch. If mean was True, it has shape (n_obs, n_var). Otherwise, it has shape (1,).
     """
     
-    count = tf.cast(count, tf.float32)
-    mu = tf.cast(output[0], tf.float32)
+    count = tf.cast(count, tf.float32) #float32
+    mu = tf.cast(output[0], tf.float32) #float32
 
     theta = tf.minimum(output[1], 1e6)
 
