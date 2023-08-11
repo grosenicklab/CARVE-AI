@@ -84,6 +84,20 @@ class COVIDDataset(Dataset):
 import pandas as pd
 
 
+
+class humanATACDataset(Dataset):
+    def __init__(self, data_path='/athena/listonlab/store/amb2022/PCMF/data/'):
+        self.x, self.y, _, _, _, _, _ = load_humanATAC(data_path=data_path)
+
+
+    def __len__(self):
+        return self.x.shape[0]
+
+    def __getitem__(self, idx):
+        return torch.from_numpy(np.array(self.x[idx])), torch.from_numpy(
+            np.array(self.y[idx])), torch.from_numpy(np.array(idx))
+    
+
 class MouseOrgansDataset(Dataset):
 
     def __init__(self):
@@ -500,6 +514,13 @@ def fit_IDEC_deep_cluster(dataset_in='FashionMNIST', data_dir='/athena/listonlab
                     dataset = COVIDDataset()
                     args.n_input = dataset.x.shape[1]
                     args.n_clusters = len(np.unique(dataset.y))
+
+
+                if args.dataset == 'humanATAC':
+                    args.pretrain_path = 'data/ae_humanATAC.pkl'
+                    dataset = humanATACDataset()
+                    args.n_input = dataset.x.shape[1]
+                    args.n_clusters = len(np.unique(dataset.y))
                 ### !!! ADD OTHER DATSETS HERE !!!
 
                 print(args)
@@ -552,7 +573,7 @@ def fit_IDEC_deep_cluster(dataset_in='FashionMNIST', data_dir='/athena/listonlab
                 accuracies.append([idx, acc, batch_size, pretrain_epochs, train_epochs])
 
         toc2 = time.time() - tic0
-        print('Total time elapsed:',toc)
+        print('Total time elapsed:',toc2)
     return accuracies, toc2, 'IDX: '+str(idx)+' Accuracy: '+str(acc)+' Batch size: '+str(batch_size)+' pretrain_epochs: '+str(pretrain_epochs)+' train_epochs: '+str(train_epochs)
 
 
