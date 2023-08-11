@@ -1,5 +1,5 @@
 from __future__ import print_function, division
-from pcmf_dataloaders import load_NCI, load_SRBCT, load_mouseorgans, load_gbmBreastLung, load_penguins
+from pcmf_dataloaders import load_NCI, load_SRBCT, load_mouseorgans, load_gbmBreastLung, load_penguins, load_humanATAC
 
 import pandas as pd
 def load_data(X_in,true_clusters_in):
