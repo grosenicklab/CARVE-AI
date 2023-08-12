@@ -132,10 +132,10 @@ def load_mouseLGNrnaseq(data_path='/Users/amandabuch/Documents/2_Research/Postdo
     
     print(np.unique(Yall))
     
-    train_X = Xall[0:int(np.floor(Xall.shape[0]*0.95)),:]
-    test_X = Xall[int(np.floor(Xall.shape[0]*0.95)):Xall.shape[0],:]
-    train_y = Yall[0:int(np.floor(Xall.shape[0]*0.95))]
-    test_y = Yall[int(np.floor(Xall.shape[0]*0.95)):Xall.shape[0]]
+    train_X = Xall[0:int(np.floor(Xall.shape[0]*0.9)),:]
+    test_X = Xall[int(np.floor(Xall.shape[0]*0.9)):Xall.shape[0],:]
+    train_y = Yall[0:int(np.floor(Xall.shape[0]*0.9))]
+    test_y = Yall[int(np.floor(Xall.shape[0]*0.9)):Xall.shape[0]]
     
     # Select training set
     X_in = train_X
@@ -890,9 +890,9 @@ def load_cifar10(labels_keep=[0,3,5], plot=False, skip=1, batch_size=50, randomi
 
 
 import pandas as pd
-def load_COVID(path='./results/pcmf_approx_uV_COVIDCancer_genomics_run_gausscoef2.0_neighbors15_rho1.5.npz'):
+def load_COVID(path='/Users/amandabuch/Documents/clusterCCA/revision1/clusterCCA/data/'):
     from sklearn.preprocessing import StandardScaler
-    data_path = 'data/covid_j.cell.2020.05.032'
+    data_path = path+'covid_j.cell.2020.05.032'
     proteomics = pd.read_csv(os.path.join(data_path,'proteomics_data_preprocessed_shared.csv'), sep=',',index_col=1, header=0)
     proteomics_batch = pd.read_csv(os.path.join(data_path,'proteomics_batch_shared.csv'), sep=',',index_col=None, header=None)
     proteomics_labels = pd.read_csv(os.path.join(data_path,'proteomics_labels_shared.csv'), sep=',',index_col=None, header=None)
@@ -1062,7 +1062,7 @@ def load_mouseorgans_MV(path='/Users/amandabuch/Documents/clusterCCA/revision1/c
     return X, Y, true_clusters
 
 
-def load_NCI_MV(path='Users/amandabuch/Documents/clusterCCA/revision1/clusterCCA/data/NCI.npz'):
+def load_NCI_MV(path='/Users/amandabuch/Documents/clusterCCA/revision1/clusterCCA/data/NCI.npz'):
     import scanpy as sc
     from anndata import AnnData
     f = np.load(path, allow_pickle=True)
@@ -1082,7 +1082,7 @@ def load_NCI_MV(path='Users/amandabuch/Documents/clusterCCA/revision1/clusterCCA
     return X, Y, true_clusters
 
 
-def load_gbmBreastLung_MV(path='Users/amandabuch/Documents/clusterCCA/revision1/clusterCCA/data/GbmBreastLungCancer.npz'):
+def load_gbmBreastLung_MV(path='/Users/amandabuch/Documents/clusterCCA/revision1/clusterCCA/data/GbmBreastLungCancer.npz'):
     import scanpy as sc
     from anndata import AnnData
     f = np.load(path, allow_pickle=True)
@@ -1102,7 +1102,7 @@ def load_gbmBreastLung_MV(path='Users/amandabuch/Documents/clusterCCA/revision1/
     return X, Y, true_clusters
 
 
-def load_SRBCT_MV(path='Users/amandabuch/Documents/clusterCCA/revision1/clusterCCA/data/SRBCT.npz'):
+def load_SRBCT_MV(path='/Users/amandabuch/Documents/clusterCCA/revision1/clusterCCA/data/SRBCT.npz'):
     import scanpy as sc
     from anndata import AnnData
     f = np.load(path, allow_pickle=True)

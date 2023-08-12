@@ -322,14 +322,16 @@ def confusion_matrix_ordered(pred, true):
     indexes = linear_assignment(_make_cost_m(conf_mat))
     js = [e for e in sorted(indexes, key=lambda x: x[0])[1]]
     conf_mat_ord = conf_mat[:, js]
+
     return conf_mat_ord
 
-def fit_pca_kmeans(X, true_clusters, n_clusters):
+def fit_pca_kmeans(X, true_clusters, n_clusters, n_components=1):
     '''CCA + Kmeans clustering'''
     from sklearn.cluster import KMeans
     # Fit PCA-kmeans
     u,d,vh = np.linalg.svd(X, full_matrices=False)
-    Xhat = u[:,0].reshape((X.shape[0], 1))*vh[0,:].reshape((1, X.shape[1]))
+    # Xhat = u[:,0].reshape((X.shape[0], 1))*vh[0,:].reshape((1, X.shape[1]))
+    Xhat = u[:,0:n_components]@vh[0:n_components,:]
     kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(Xhat)
     labels = kmeans.labels_
     #
@@ -341,12 +343,12 @@ def fit_pca_kmeans(X, true_clusters, n_clusters):
     #
     return labels, ari, nmi, acc
 
-def fit_cca_kmeans(X, Y, true_clusters, n_clusters):
+def fit_cca_kmeans(X, Y, true_clusters, n_clusters, n_components=1):
     '''CCA + Kmeans clustering'''
     from sklearn.cross_decomposition import CCA
     from sklearn.cluster import KMeans
     # Fit CCA-kmeans
-    cca = CCA(n_components=1)
+    cca = CCA(n_components=n_components)
     cca.fit(X, Y)
     X_c, Y_c = cca.transform(X, Y)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(np.hstack((X_c,Y_c)))
@@ -354,6 +356,10 @@ def fit_cca_kmeans(X, Y, true_clusters, n_clusters):
     #
     # Calculate scores
     nmi, ari, ri, mse = calculate_scores_nonpath(labels,true_clusters)
+    # Calculate accuracy
+    conf_mat_ord = confusion_matrix_ordered(labels,true_clusters)
+    acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
+    #
     return labels, ari, nmi, acc
 
 
@@ -396,6 +402,24 @@ def fit_spectral(X, true_clusters, n_clusters):
     acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
     #
     return labels, ari, nmi, acc
+
+
+def fit_kmeans(X, true_clusters, n_clusters):
+    '''Kmeans clustering'''
+    from sklearn.cluster import KMeans
+    #
+    kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(X)
+    labels = kmeans.labels_
+    #
+    # Calculate scores
+    nmi, ari, ri, mse = calculate_scores_nonpath(labels, true_clusters)
+    # Calculate accuracy
+    conf_mat_ord = confusion_matrix_ordered(labels,true_clusters)
+    acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
+    #
+    return labels, ari, nmi, acc
+
+
 
 # def fit_spectral(X, true_clusters, n_clusters):
 #     '''Spectral clustering'''
@@ -450,15 +474,17 @@ def fit_leiden_or_louvain(X_in, true_clusters_in, ctype='Leiden', neighbors=5):
         # Calculate accuracy
         conf_mat_ord = confusion_matrix_ordered(y_pred, dataset_y)
         acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
-        print('NN 5 Leiden ACC',acc)
+        print('NN ',neighbors,' Leiden ACC',acc)
 
     elif ctype=='Louvain':
+        sc.pp.pca(adata)
+        sc.pp.neighbors(adata,n_neighbors=neighbors)
         sc.tl.louvain(adata)
         y_pred = pd.factorize(adata.obs['louvain'].tolist())[0]
         # Calculate accuracy
         conf_mat_ord = confusion_matrix_ordered(y_pred, dataset_y)
         acc = np.sum(np.diag(conf_mat_ord))/np.sum(conf_mat_ord)
-        print('NN 5 Louvain ACC',acc)
+        print('NN ',neighbors,' Louvain ACC',acc)
 
     else:
         print('ctype error '+str(ctype))
@@ -521,12 +547,12 @@ def fit_elasticnetsubspace(X, true_clusters, n_clusters):
 
 def fit_elasticsubspace(X, true_clusters, n_clusters,elasticsubpace_path='/Users/amandabuch/Documents/clusterCCA/revision1/clusterCCA/utils/subspace-clustering-master'):
     import os
-    os.setwd(elasticsubpace_path)
-    import progressbar2
+    os.chdir(elasticsubpace_path)
+    import progressbar
     from cluster.selfrepresentation import ElasticNetSubspaceClustering
     cluster_method = 'Elastic Subspace'
     tic = time.time()
-    labels, ari, nmi, acc = fit_elasticnetsubspace(X_in, true_clusters_in, num_clusters)
+    labels, ari, nmi, acc = fit_elasticnetsubspace(X, true_clusters, n_clusters)
     toc = time.time() - tic
     print(cluster_method,acc,toc)
 
@@ -658,12 +684,13 @@ def fit_VarSel(X, true_clusters, n_clusters, num_cores):
     return labels, ari, nmi, acc
 
 
-def fit_pca_carp(X, true_clusters, n_clusters):
+def fit_pca_carp(X, true_clusters, n_clusters, n_components=1):
     '''CCA + Kmeans clustering'''
     from sklearn.cluster import KMeans
     # Fit PCA-kmeans
     u,d,vh = np.linalg.svd(X, full_matrices=False)
-    Xhat = u[:,0].reshape((X.shape[0], 1))*vh[0,:].reshape((1, X.shape[1]))
+    # Xhat = u[:,0].reshape((X.shape[0], 1))*vh[0,:].reshape((1, X.shape[1]))
+    Xhat = u[:,0:n_components]@vh[0:n_components,:]
 
     labels, ari, nmi, acc = fit_carp(Xhat, true_clusters, n_clusters)
 
@@ -1118,16 +1145,21 @@ def diff_graph_cluster(Xhat, D, comb_list, num_clusters, thresh_sd=6, pca_clean=
 # print('CARP ACC',acc,'Time elapsed:',toc)
 
 
-def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=False, dataset_in=None, data_dir='/athena/listonlab/store/amb2022/PCMF'):
+def fit_cluster_comparisons(X, true_clusters, Y=None, XY=None, dtype='PCA', n_components_PCAorCCA=1, run_nondeep=True, run_deep=False, dataset_in=None, data_dir='/athena/listonlab/store/amb2022/PCMF'):
     ''' dtype='PCA' or 'CCA' '''
     import time
-    smallenough_ward = X.shape[0] < 1000 # < N=XXX
-    smallenough_spectral = X.shape[0] < 1000 # < N=XXX
-    smallenough_elastic = X.shape[0] < 400 # < N=XXX
-    smallenough_gmadd = X.shape[0] < 1000 # < N=XXX
-    smallenough_hdcc = X.shape[0] < 400 # < N=XXX
-    smallenough_dpgmm = X.shape[0] < 1000 # < N=XXX
-    smallenough_carp = X.shape[0] < 400 # < N=XXX
+
+    if dtype=='PCA':
+        XY = np.copy(X)
+
+    smallenough_ward = XY.shape[0] < 3000 #1000 # < N=XXX
+    smallenough_spectral = XY.shape[0] < 3000 #1000 # < N=XXX
+    smallenough_elastic = XY.shape[0] < 400 # < N=XXX
+    smallenough_gmadd = XY.shape[0] < 3000 #1000 # < N=XXX
+    smallenough_hdcc = XY.shape[0] < 400 # < N=XXX
+    smallenough_dpgmm = XY.shape[0] < 400 #1000 # < N=XXX
+    smallenough_carp = XY.shape[0] < 400 # < N=XXX
+    smallenough_CarDEC = XY.shape[0] < 400 # < N=XXX
 
     clustering_names = []
     labels_all = []
@@ -1136,11 +1168,14 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
     acc_all = []
     toc_all = []
 
+    n_clusters = len(np.unique(true_clusters))
+
     if run_nondeep is True:
         if dtype=='PCA':
             try:
+                print('fitting PCA')
                 tic = time.time()
-                labels, ari, nmi, acc = fit_pca_kmeans(X, true_clusters, n_clusters) # append labels, ari, nmi, acc and string of name to dataframe...
+                labels, ari, nmi, acc = fit_pca_kmeans(X, true_clusters, n_clusters, n_components=n_components_PCAorCCA) # append labels, ari, nmi, acc and string of name to dataframe...
                 toc = time.time() - tic
                 clustering_names.append('PCA + K-means')
                 labels_all.append(labels)
@@ -1152,8 +1187,10 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
                 print('Failed on PCA + K-means')
         if dtype=='CCA':
             try:
+                print('fitting CCA')
                 tic = time.time()
-                labels, ari, nmi, acc = fit_cca_kmeans(X, Y, true_clusters, n_clusters)
+                print(X.shape,Y.shape,true_clusters.shape,n_clusters)
+                labels, ari, nmi, acc = fit_cca_kmeans(X, Y, true_clusters, n_clusters, n_components=n_components_PCAorCCA)
                 toc = time.time() - tic
                 clustering_names.append('CCA + K-means')
                 labels_all.append(labels)
@@ -1164,10 +1201,11 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
             except:
                 print('Failed on CCA + K-means')
         ## If dataset is small enough
-        if dataset is smallenough_ward:
+        if smallenough_ward:
             try:
+                print('fitting Ward')
                 tic = time.time()
-                labels, ari, nmi, acc = fit_ward(X, true_clusters, n_clusters)
+                labels, ari, nmi, acc = fit_ward(XY, true_clusters, n_clusters)
                 toc = time.time() - tic
                 clustering_names.append('Ward')
                 labels_all.append(labels)
@@ -1178,10 +1216,11 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
             except:
                 print('Failed on Ward')
         ## If dataset is small enough
-        if dataset is smallenough_spectral:
+        if smallenough_spectral:
             try:
+                print('fitting Spectral')
                 tic = time.time()
-                labels, ari, nmi, acc = fit_spectral(X, true_clusters, n_clusters)
+                labels, ari, nmi, acc = fit_spectral(XY, true_clusters, n_clusters)
                 toc = time.time() - tic
                 clustering_names.append('Spectral')
                 labels_all.append(labels)
@@ -1192,10 +1231,11 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
             except:
                 print('Failed on Spectral')
         ## If dataset is small enough
-        if dataset is smallenough_elastic:
+        if smallenough_elastic:
             try:
+                print('fitting elastic subspace')
                 tic = time.time()
-                labels, ari, nmi, acc = fit_elasticnetsubspace(X, true_clusters, n_clusters) / fit_elasticsubspace(X, true_clusters, n_clusters)
+                labels, ari, nmi, acc = fit_elasticsubspace(X, true_clusters, n_clusters)# fit_elasticnetsubspace(XY, true_clusters, n_clusters) / 
                 toc = time.time() - tic
                 clustering_names.append('Elastic Subspace')
                 labels_all.append(labels)
@@ -1207,10 +1247,11 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
                 print('Failed on Elastic Subspace')
 
         ## If dataset is small enough
-        if dataset is smallenough_gmadd:
+        if smallenough_gmadd:
             try:
+                print('fitting gMADD')
                 tic = time.time()
-                labels, ari, nmi, acc = fit_gMADD(X, true_clusters, n_clusters)
+                labels, ari, nmi, acc = fit_gMADD(XY, true_clusters, n_clusters)
                 toc = time.time() - tic
                 clustering_names.append('gMADD')
                 labels_all.append(labels)
@@ -1222,10 +1263,11 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
                 print('Failed on gMADD')
 
         ## If dataset is small enough
-        if dataset is smallenough_hdcc:
+        if smallenough_hdcc:
             try:
+                print('fitting HDCC')
                 tic = time.time()
-                labels, ari, nmi, acc = fit_hddc(X, true_clusters, n_clusters)
+                labels, ari, nmi, acc = fit_hddc(XY, true_clusters, n_clusters)
                 toc = time.time() - tic
                 clustering_names.append('HDDC')
                 labels_all.append(labels)
@@ -1238,10 +1280,11 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
 
         for neighbors in np.arange(5,26,5):
             try:
+                print('fitting Leiden ', neighbors)
                 tic = time.time()
-                labels, ari, nmi, acc = fit_leiden_or_louvain(X, true_clusters, ctype='Leiden', neighbors=neighbors)
+                labels, ari, nmi, acc = fit_leiden_or_louvain(XY, true_clusters, ctype='Leiden', neighbors=neighbors)
                 toc = time.time() - tic
-                clustering_names.append('Leiden')
+                clustering_names.append('Leiden_'+str(neighbors))
                 labels_all.append(labels)
                 ari_all.append(ari)
                 nmi_all.append(nmi)
@@ -1251,10 +1294,11 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
                 print('Failed on Leiden')
 
             try:
+                print('fitting Louvain ',neighbors)
                 tic = time.time()
-                labels, ari, nmi, acc = fit_leiden_or_louvain(X, true_clusters, ctype='Louvain', neighbors=neighbors)
+                labels, ari, nmi, acc = fit_leiden_or_louvain(XY, true_clusters, ctype='Louvain', neighbors=neighbors)
                 toc = time.time() - tic
-                clustering_names.append('Louvain')
+                clustering_names.append('Louvain_'+str(neighbors))
                 labels_all.append(labels)
                 ari_all.append(ari)
                 nmi_all.append(nmi)
@@ -1264,10 +1308,11 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
                 print('Failed on Louvain')
 
         ## If dataset is small enough
-        if dataset is smallenough_dpgmm:
+        if smallenough_dpgmm:
             try:
+                print('fitting DP-GMM')
                 tic = time.time()
-                labels, ari, nmi, acc = fit_dpgmm(X, true_clusters, n_clusters)
+                labels, ari, nmi, acc = fit_dpgmm(XY, true_clusters, n_clusters)
                 toc = time.time() - tic
                 clustering_names.append('DP-GMM')
                 labels_all.append(labels)
@@ -1278,10 +1323,11 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
             except:
                 print('Failed on DP-GMM')
         ## If dataset is small enough
-        if dataset is smallenough_carp:
+        if smallenough_carp:
             try:
+                print('fitting hCARP')
                 tic = time.time()
-                labels, ari, nmi, acc = fit_carp(X, true_clusters, n_clusters)
+                labels, ari, nmi, acc = fit_carp(XY, true_clusters, n_clusters)
                 toc = time.time() - tic
                 clustering_names.append('hCARP')
                 labels_all.append(labels)
@@ -1294,8 +1340,9 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
 
             if dtype=='PCA':
                 try:
+                    print('fitting PCA + hCARP')
                     tic = time.time()
-                    labels, ari, nmi, acc = fit_pca_carp(X, true_clusters, n_clusters)
+                    labels, ari, nmi, acc = fit_pca_carp(X, true_clusters, n_clusters, n_components=n_components_PCAorCCA)
                     toc = time.time() - tic
                     clustering_names.append('PCA + hCARP')
                     labels_all.append(labels)
@@ -1308,8 +1355,9 @@ def fit_cluster_comparisons(X, Y=None, dtype='PCA', run_nondeep=True, run_deep=F
 
             elif dtype=='CCA':
                 try:
+                    print('fitting CCA + hCARP')
                     tic = time.time()
-                    labels, ari, nmi, acc = fit_cca_carp(X, Y, true_clusters, n_clusters)
+                    labels, ari, nmi, acc = fit_cca_carp(X, Y, true_clusters, n_clusters, n_components=n_components_PCAorCCA)
                     toc = time.time() - tic
                     clustering_names.append('CCA + hCARP')
                     labels_all.append(labels)
