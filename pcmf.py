@@ -1,5 +1,5 @@
 import numpy as np
-#import mosek
+import mosek
 import cvxpy as cp
 import matplotlib.pyplot as plt
 import time
@@ -9,7 +9,7 @@ from itertools import combinations
 from sklearn import datasets
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import SpectralClustering
+    from sklearn.cluster import SpectralClustering
 
 # to use first run 'python setup.py build_ext --inplace'
 # from admm_utils import prox as cprox
@@ -167,7 +167,7 @@ def clusterpath_PCMF_subproblem_u(X_list, num_var, penalty, verb=True):
     l2_reg = cp.Parameter(nonneg=True)
     constraints = [cp.norm2(beta)**2 <= 1]
     problem = cp.Problem(cp.Minimize(objective_fn_u2(X, beta, penalty)), constraints)
-    mosek_params = {} #{'MSK_DPAR_MIO_TOL_ABS_GAP':1e-1}                                  
+    mosek_params = {'MSK_DPAR_MIO_TOL_ABS_GAP':1e-1}                                  
     problem.solve(solver='MOSEK',verbose=verb, warm_start=True, mosek_params=mosek_params)
     #err = mse(X, beta)                                                                    
     return beta.value #, err
@@ -481,14 +481,19 @@ def pcmf_approx_uV(X, penalty_list, rho=1.0, admm_iters = 5, verb=False, weights
             # Update u                                                                                                   
             Xu_tildes = []
             for i in range(X.shape[0]):
-                Xu_tildes.append(np.dot(X[i,:],V[i,:]))
+                Xu_tildes.append(np.dot(X[i,:],V[i,:]))h
             Xu = np.asarray(Xu_tildes)
             try:
                 u = clusterpath_PCMF_subproblem_u(Xu_tildes, 1, penalty, verb)
             except:
                 print("PCMF subproblem is not defined for single cluster u, using PMD subproblem.")
                 u = clusterpath_PMD_subproblem_u(Xu_tildes, 1, verb)
-            u.shape = (len(u),1)
+                u_prev = u.copy()
+            if u is None:
+                u = u_prev
+                u.shape = (len(u),1)
+            else:
+                u.shape = (len(u),1)
             s = u*Xv
             #u = u/s
             u_list.append(u)
@@ -1253,7 +1258,7 @@ def select_fit(n_clusts, ics, num_clusters):
         idxs = idxs[0]
     return start_num + idxs
 
-def cluster_path(X_c, Xhat_list, penalty_list, gauss_coef, neighbors, verbose=False):
+def cluster_path(X_c, Xhat_list, penalty_list, gauss_coef, neighbors, verbose=False, selection='lik', method='spectral'):
     '''
     Estimate number of clusters and fit quality at each value of the penalty.
     '''
@@ -1263,7 +1268,7 @@ def cluster_path(X_c, Xhat_list, penalty_list, gauss_coef, neighbors, verbose=Fa
     n_clust = 1
     D = sparse_D(X_c.shape[0],X_c.shape[1])
     weights = get_weights(X_c, gauss_coef=gauss_coef, neighbors=neighbors)
-    #
+    # 
     notinf_idx = np.where(np.asarray(penalty_list)<np.inf)[0]
     penalty_list = penalty_list[notinf_idx]
     Xhat_list = [Xhat_list[i] for i in range(len(Xhat_list)) if i in notinf_idx]
@@ -1271,14 +1276,14 @@ def cluster_path(X_c, Xhat_list, penalty_list, gauss_coef, neighbors, verbose=Fa
         penalty = penalty_list[i]
         if n_clust < Xhat.shape[0]:
             out, n_clust, labels, ic = cluster_forwardstep(Xhat, X_c, D, n_clust, penalty, weights, 
-                                                            method='spectral', gamma=gauss_coef, selection='lik', verbose=verbose)
+                                                            method=method, gamma=gauss_coef, selection=selection, verbose=verbose)
         n_clusts.append(n_clust)
         ics.append(ic)
         centroids.append(out)
     return n_clusts, ics, centroids
 
 from p3ca import convex_clust_df
-def cluster_forwardstep(Xhat, X, D, n_clust_previous, penalty, weights, method='spectral', gamma=1.0, selection='bic', verbose=False):
+def cluster_forwardstep(Xhat, X, D, n_clust_previous, penalty, weights, method='spectral', gamma=1.0, selection='lik', verbose=False):
     epsilon = penalty
     #
     # Cluster on the rows of Xhat with k=n_clust_previous
@@ -1301,7 +1306,7 @@ def cluster_forwardstep(Xhat, X, D, n_clust_previous, penalty, weights, method='
         df1 = 1
     #print('DF1:',df1, n_clust_previous)
     #
-    # Cluster on the rows of V with k=n_clust_previous+1 
+    # Cluster on the rows of Xhat with k=n_clust_previous+1 
     if method == 'spectral':
         clustering = SpectralClustering(n_clusters = n_clust_previous+1, gamma=gamma, \
                                         assign_labels='discretize',affinity='rbf')
@@ -1324,13 +1329,15 @@ def cluster_forwardstep(Xhat, X, D, n_clust_previous, penalty, weights, method='
     # Check loss for both clusterings
     loglik1 = np.linalg.norm(X - Xhat1, 2)**2 + penalty*np.sum(weights*np.sum(np.abs(D*Xhat1),axis=1))
     loglik2 = np.linalg.norm(X - Xhat2, 2)**2 + penalty*np.sum(weights*np.sum(np.abs(D*Xhat2),axis=1))
+    #print('loglik1',loglik1)
+    #print('loglik2',loglik2)
     #
     if selection == 'aic':
         ic1 = loglik1 + 2*df1 
         ic2 = loglik2 + 2*df2 
     elif selection == 'bic':
-        ic1 = loglik1 + df1*np.log(Xhat.shape[0])
-        ic2 = loglik2 + df2*np.log(Xhat.shape[0])
+        ic1 = df1*np.log(Xhat.shape[0]) - 2*loglik1 
+        ic2 = df2*np.log(Xhat.shape[0]) - 2*loglik2
     else:
         ic1 = loglik1
         ic2 = loglik2
@@ -1349,7 +1356,6 @@ def cluster_forwardstep(Xhat, X, D, n_clust_previous, penalty, weights, method='
         if verbose:
             print('Num clusters:', n_clust_previous)
         return centroid_matrix(Xhat,labels1), n_clust_previous, labels1, ic1
-
 
 ############ Data generation functions #############
 
@@ -1529,7 +1535,7 @@ def path_plot(coefficient_arr, penalty_list,plot_range=[0,-1], cut_vars=False, f
         coefficient_arr = coefficient_arr[:,:,[var_sel]]
 
     # Colormap
-    cmap = cm.get_cmap('viridis', coefficient_arr.shape[2])
+    cmap = cm.get_cmap('tab20b', coefficient_arr.shape[2])
     colors = cmap(np.linspace(0.0,1.0,coefficient_arr.shape[2]))
 
     # Define x-axis range

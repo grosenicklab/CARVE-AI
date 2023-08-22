@@ -3529,8 +3529,11 @@ def fit_dec(X_in, true_clusters_in, batch_size_options=[15, 30], finetune_iters_
                             
                         print('IDX:',idx, 'Accuracy:', acc, 'Batch size:',batch_size, 'finetune_iters:',finetune_iters, 'layerwise_pretrain_iters:',layerwise_pretrain_iters, 'cluster_iter_max:',cluster_iter_max)
                         idx = idx+1
-                        accuracies.append([idx, acc, batch_size, finetune_iters, layerwise_pretrain_iters, cluster_iter_max,])
-                        del acc 
+
+                        #accuracies.append([idx, acc, batch_size, finetune_iters, layerwise_pretrain_iters, cluster_iter_max,])
+                        accuracies.append(labels)
+
+
                         # make it so string returned is the best accuracy...
         # pd.DataFrame(accuracies, columns = ['idx','Accuracy', 'BatchSize','finetune_iters', 'layerwise_pretrain_iters', 'cluster_iter_max'])
     toc = time.time() - tic

@@ -1199,7 +1199,7 @@ def calculate_scores_nonpath(pred_clusters, true_clusters):
 
 ###------- PLOTTING FUNCTIONS -------###
 from matplotlib import cm
-def path_plot(coefficient_arr, penalty_list,plot_range=[0,-1],cut_vars=False):
+def path_plot(coefficient_arr, penalty_list,plot_range=[0,-1],cut_vars=False, cmap='tab20b'):
     # Crop x axis (e.g, to remove 'burn-in' period at beginning)
     coefficient_arr = coefficient_arr[plot_range[0]:plot_range[1],:,:]
     penalty_list = penalty_list[plot_range[0]:plot_range[1]]
@@ -1207,7 +1207,7 @@ def path_plot(coefficient_arr, penalty_list,plot_range=[0,-1],cut_vars=False):
         coefficient_arr = coefficient_arr[:,:,[1,2,coefficient_arr.shape[2]-1]]
 
     # Colormap
-    cmap = cm.get_cmap('viridis', coefficient_arr.shape[2])
+    cmap = cm.get_cmap(cmap, coefficient_arr.shape[2])
     colors = cmap(np.linspace(0.0,1.0,coefficient_arr.shape[2]))
 
     # Define x-axis range

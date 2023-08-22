@@ -32,7 +32,7 @@ from matplotlib import pyplot as plt
 from matplotlib import animation
 from IPython.display import HTML
 
-import rpy2
+#import rpy2
 
 from torch.utils.data import Dataset
 import h5py
