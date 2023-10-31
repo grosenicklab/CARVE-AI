@@ -9,7 +9,7 @@ from itertools import combinations
 from sklearn import datasets
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-    from sklearn.cluster import SpectralClustering
+from sklearn.cluster import SpectralClustering
 
 # to use first run 'python setup.py build_ext --inplace'
 # from admm_utils import prox as cprox
@@ -481,7 +481,7 @@ def pcmf_approx_uV(X, penalty_list, rho=1.0, admm_iters = 5, verb=False, weights
             # Update u                                                                                                   
             Xu_tildes = []
             for i in range(X.shape[0]):
-                Xu_tildes.append(np.dot(X[i,:],V[i,:]))h
+                Xu_tildes.append(np.dot(X[i,:],V[i,:]))
             Xu = np.asarray(Xu_tildes)
             try:
                 u = clusterpath_PCMF_subproblem_u(Xu_tildes, 1, penalty, verb)
