@@ -5,7 +5,7 @@
 
 CARVE is a novel framework that simultaneously performs joint clustering and embedding by combining standard embedding methods using a convex clustering penalty in a modular way.
 
-🔅 Currently CARVE is composed of the following algorithms (Please cite Buch et al., AISTATS 2024):
+Currently CARVE is composed of the following algorithms (Please cite Buch et al., AISTATS 2024):
 
 Pathwise Clustered Matrix Factorization (PCMF). PCMF implements cluster-aware principal component analysis on a single-view dataset. 
 Locally Linear Pathwise Clustered Matrix Factorization (LL-PCMF). LL-PCMF implements cluster-aware locally linear embedding on a single-view dataset. 
@@ -13,7 +13,7 @@ Pathwise Clustered Canonical Correlation Analysis (P3CA). P3CA implements cluste
 
 ---
 
-## Installation and Demo
+## Installation and Demo of AISTATS code
 
 - Installing Conda environment using .yml file with Mamba:
 mamba env create -f aistats_2024.yml
