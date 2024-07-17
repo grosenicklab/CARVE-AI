@@ -36,11 +36,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ---
 ## References
 
-📄 Full Paper May 2024: Buch, Amanda M., Liston, Conor & Grosenick, Logan. Simple and Scalable Algorithms for Cluster-Aware Precision Medicine. AISTATS 2024.
+📄 Full Paper May 2024: Buch, Amanda M., Liston, Conor & Grosenick, Logan. Simple and Scalable Algorithms for Cluster-Aware Precision Medicine. Proceedings of The 27th International Conference on Artificial Intelligence and Statistics (AISTATS), PMLR 238:136-144 https://proceedings.mlr.press/v238/m-buch24a/m-buch24a.pdf.
 
-📄 Short Paper December 2023: Buch, Amanda M., Liston, Conor & Grosenick, Logan. (2023). Cluster-Aware Algorithms for AI-Enabled Precision Medicine. Neural Information Processing Systems Conference: LatinX in AI (LXAI) Research Workshop 2023, New Orleans, Louisiana. https://doi.org/10.52591/lxai2023121011
+📄 NeurIPS Workshop Short Paper December 2023: Buch, Amanda M., Liston, Conor & Grosenick, Logan. (2023). Cluster-Aware Algorithms for AI-Enabled Precision Medicine. Neural Information Processing Systems Conference: LatinX in AI (LXAI) Research Workshop 2023, New Orleans, Louisiana. https://doi.org/10.52591/lxai2023121011
 
-📄 Preprint November 2022: Buch, Amanda M., Liston, Conor & Grosenick, Logan. Simple and Scalable Algorithms for Cluster-Aware Precision Medicine. AISTATS 2024. https://arxiv.org/abs/2211.16553
+📄 arXiv Preprint November 2022: Buch, Amanda M., Liston, Conor & Grosenick, Logan. Simple and Scalable Algorithms for Cluster-Aware Precision Medicine. https://arxiv.org/abs/2211.16553
 
 ---
 
