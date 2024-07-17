@@ -22,13 +22,17 @@ mamba env create -f aistats_2024.yml
 
 - If you encounter problems with 'admm_utils', you can rebuild the Cython files locally by first installing Cython:
 
+```
 conda install -c anaconda cython
+```
 
 ...and then running:
 
+```
 python setup.py build_ext --inplace
+```
 
-- The jupyter notebook 'Example notebook for  aistats 2024.ipynb' contains runnable examples. 
+- The jupyter notebook 'Example notebook for aistats 2024.ipynb' contains runnable examples. 
 
 ---
 
