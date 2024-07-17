@@ -1,7 +1,8 @@
+# Welcome to Cluster-Aware Routines for Versatile Embedding (CARVE) 
 
-#--------------------------------------#
-#          CODE  INSTALLATION          #
-#--------------------------------------#
+
+
+# Installation
 
 - Installing Conda environment using .yml file with Mamba:
 mamba env create -f aistats_2024.yml
